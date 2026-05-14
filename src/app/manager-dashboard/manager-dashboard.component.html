@@ -1,0 +1,2531 @@
+<!--
+    =====================================================
+    檔案名稱：manager-dashboard.component.html
+    用途說明：老闆後台管理主控台的 HTML 結構
+    說明：
+      - @if (activeTab() === '...') 取代原型的 CSS display:none 頁籤切換
+      - [class.active] 取代 JS 動態加入 active class 到 .nav-item
+      - (click) 事件呼叫 setTab() / setUserSubTab() 切換頁籤
+      - {{ }} 插值顯示即時時鐘、使用者名稱、頭像首字
+      - 需要 Bootstrap 5.3.8（在 index.html 透過 CDN 引入）
+      - 帳號 : admin@lazybao.com	密碼 : admin1234	 管理後台
+      - 帳號 : manager@lazybao.com	密碼 : mgr1234	 POS 終端（分店長）
+      - 帳號 : staff@lazybao.com	密碼 : staff1234		POS 終端（員工）
+    =====================================================
+  -->
+
+<!-- ── 側邊欄 (Sidebar) ─────────────────────────────── -->
+<aside class="sidebar">
+  <!-- 品牌 Logo 區 -->
+  <div class="sidebar-brand">
+    <!-- Logo 圓形圖示 -->
+    <img src="assets/logo圓形.png" alt="懶飽飽 Logo" class="sidebar-brand-logo" />
+    <!-- 系統名稱 -->
+    <div class="sidebar-brand-name">懶飽飽餐飲管理系統</div>
+    <!-- 副標題：英文系統識別名稱 -->
+    <div class="sidebar-brand-role">LazyBaoBaoSystem</div>
+  </div>
+
+  <!-- 使用者資訊 -->
+  <div class="sidebar-user">
+    <div class="d-flex align-items-center gap-2">
+      <div class="sidebar-avatar">{{ getAvatarLetter() }}</div>
+      <div>
+        <div class="sidebar-uname">{{ authService.currentUser?.name }}</div>
+        <div class="sidebar-urole">超級管理員 · 全部分店</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 主導覽列 -->
+  <nav class="sidebar-nav">
+    <!-- 帳號管理 -->
+    <div class="nav-item" [class.active]="activeTab() === 'users'" (click)="setTab('users')">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+          style="width: 16px; height: 16px; vertical-align: middle">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg></span>
+      帳號管理
+    </div>
+    <!-- 分店管理 -->
+    <div class="nav-item" [class.active]="activeTab() === 'branches'" (click)="setTab('branches')">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+          style="width: 16px; height: 16px; vertical-align: middle">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg></span>
+      分店管理
+    </div>
+    <!-- 國家基本設定 -->
+    <div class="nav-item" [class.active]="activeTab() === 'tax'" (click)="setTab('tax')">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+          style="width: 16px; height: 16px; vertical-align: middle">
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg></span>
+      國家基本設定
+    </div>
+    <!-- 會員設定 -->
+    <div class="nav-item" [class.active]="activeTab() === 'member'" (click)="setTab('member')">
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;vertical-align:middle">
+          <path d="M20 12V22H4V12" />
+          <path d="M22 7H2v5h20V7z" />
+          <path d="M12 22V7" />
+          <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z" />
+          <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z" />
+        </svg>
+      </span>
+      會員設定
+    </div>
+    <!-- 商品管理 -->
+    <div class="nav-item" [class.active]="activeTab() === 'products'" (click)="setTab('products')">
+      <span class="nav-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+          stroke-linecap="round" stroke-linejoin="round" style="width: 16px; height: 16px; vertical-align: middle">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+          <line x1="3" y1="6" x2="21" y2="6" />
+          <path d="M16 10a4 4 0 0 1-8 0" />
+        </svg>
+      </span>
+      商品管理
+    </div>
+    <!-- 活動管理 -->
+    <div class="nav-item" [class.active]="activeTab() === 'promotions'" (click)="setTab('promotions')">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+          style="width: 16px; height: 16px; vertical-align: middle">
+          <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+          <circle cx="7" cy="7" r="1.5" fill="currentColor" stroke="none" />
+        </svg></span>
+      活動管理
+    </div>
+    <!-- 財務報表 -->
+    <div class="nav-item" [class.active]="activeTab() === 'finance'" (click)="setTab('finance')">
+      <span class="nav-icon"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="1" x2="12" y2="23" />
+          <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+        </svg></span>
+      財務報表
+    </div>
+  </nav>
+
+  <!-- 登出 -->
+  <div class="sidebar-footer">
+    <button class="btn btn-sm w-100 btn-ghost-red" (click)="logout()">
+      ← 登出系統
+    </button>
+  </div>
+</aside>
+
+<!-- ── 主內容框架 ────────────────────────────────────── -->
+<div class="main-wrapper">
+  <!-- 頂部工具列 -->
+  <div class="topbar">
+    <div class="topbar-title">{{ topbarTitle }}</div>
+    <div class="d-flex align-items-center gap-3">
+      <span style="font-size: 0.78rem; color: #4a5a70">{{ clockStr() }}</span>
+      <span class="badge-ok">系統正常</span>
+    </div>
+  </div>
+
+  <!-- 頁籤內容父層 -->
+  <div class="main-content">
+
+    <!-- ════════════════════════════════════════
+          頁籤 1：帳號管理（Signal 驅動，停/復權即時生效）
+          ════════════════════════════════════════ -->
+    @if (activeTab() === "users") {
+    <div>
+      <div class="page-title">帳號管理</div>
+
+      <!-- 三個子頁籤 + 新增按鈕 -->
+      <div class="d-flex gap-2 mb-4 align-items-center flex-wrap">
+        <button class="btn btn-sm subtab-btn" [class.is-purple]="userSubTab() === 'bm'" (click)="setUserSubTab('bm')">
+          分店長帳號
+          <span style="margin-left:4px; font-size:0.72rem; opacity:0.8">
+            ({{ filteredBmAccounts().length }} / {{ bmAccounts().length }})
+          </span>
+        </button>
+
+        <button class="btn btn-sm subtab-btn" [class.is-blue]="userSubTab() === 'ma'" (click)="setUserSubTab('ma')">
+          副店長帳號
+          <span style="margin-left:4px; font-size:0.72rem; opacity:0.8">
+            ({{ filteredMaAccounts().length }} / {{ maAccounts().length }})
+          </span>
+        </button>
+
+        <button class="btn btn-sm subtab-btn" [class.is-teal]="userSubTab() === 'staff'"
+          (click)="setUserSubTab('staff')">
+          員工帳號
+          <span style="margin-left:4px; font-size:0.72rem; opacity:0.8">
+            ({{ filteredStaffAccounts().length }} / {{ staffAccounts().length }})
+          </span>
+        </button>
+
+        <div class="d-flex align-items-center gap-2 ms-auto">
+          <label style="font-size:0.78rem; color:#4a5a70; white-space:nowrap">
+            分店篩選
+          </label>
+
+          <select class="form-select form-select-sm form-ctrl" style="width: 210px" [ngModel]="accountBranchFilter()"
+            (ngModelChange)="accountBranchFilter.set($event)">
+            <option value="">全部分店</option>
+
+            @for (b of sortedBranches(); track b.id) {
+            <option [value]="b.name">{{ b.country }}｜{{ b.name }}</option>
+            }
+          </select>
+
+          @if (accountBranchFilter()) {
+          <button class="btn btn-sm btn-ghost-gold" type="button" (click)="resetAccountBranchFilter()">
+            重置
+          </button>
+          }
+        </div>
+
+        <button class="btn btn-sm btn-gold" (click)="openAddAccount()">
+          + 新增
+          @if (userSubTab() === 'bm') { 分店長 }
+          @else if (userSubTab() === 'ma') { 副店長 }
+          @else { 員工 }
+        </button>
+      </div>
+      <!-- 分店長列表 -->
+      @if (userSubTab() === "bm") {
+      <div class="content-card">
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>帳號</th>
+                <th>所屬分店</th>
+                <th>國家</th>
+                <th>入職日期</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (filteredBmAccounts().length === 0) {
+              <td colspan="7" style="text-align:center; color:#8892b0; padding:24px">
+                @if (accountBranchFilter()) {
+                此分店尚無分店長帳號
+                } @else {
+                尚無分店長帳號
+                }
+              </td>
+              }
+              @for (acc of filteredBmAccounts(); track acc.id) {
+              <tr>
+                <td style="font-weight:600">{{ acc.name }}</td>
+                <td class="mono" style="color:#c084fc">{{ acc.account }}</td>
+                <td>{{ acc.branch }}</td>
+                <td style="color:#4a5a70">{{ acc.country ?? "—" }}</td>
+                <td style="color:#4a5a70">{{ acc.joinedAt }}</td>
+                <td>
+                  @if (acc.isActive) {
+                  <span class="badge-ok">啟用</span>
+                  } @else {
+                  <span class="badge-err">停權</span>
+                  }
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <button class="btn btn-sm btn-ghost-gold" (click)="resetPasswordAccount(acc.id)">重設密碼</button>
+                    @if (acc.isActive) {
+                    <button class="btn btn-sm btn-ghost-red" (click)="toggleAccount(acc.id)">停權</button>
+                    } @else {
+                    <button class="btn btn-sm btn-ghost-green" (click)="toggleAccount(acc.id)">復權</button>
+                    }
+                    <button class="btn btn-sm btn-ghost-blue"
+                      (click)="adminChangeRoleAction(acc.id, 'MANAGER_AGENT')">降為副店長</button>
+                    <button class="btn btn-sm btn-ghost-teal"
+                      (click)="adminChangeRoleAction(acc.id, 'STAFF')">降為員工</button>
+                    <button class="btn btn-sm btn-ghost-amber" (click)="openTransferBranch(acc.id)">調換分店</button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
+
+      <!-- 副店長列表 -->
+      @if (userSubTab() === "ma") {
+      <div class="content-card">
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>帳號</th>
+                <th>所屬分店</th>
+                <th>國家</th>
+                <th>入職日期</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (filteredMaAccounts().length === 0) {
+              <td colspan="7" style="text-align:center; color:#8892b0; padding:24px">
+                @if (accountBranchFilter()) {
+                此分店尚無副店長帳號
+                } @else {
+                尚無副店長帳號
+                }
+              </td>
+              }
+              @for (acc of filteredMaAccounts(); track acc.id) {
+              <tr>
+                <td style="font-weight:600">{{ acc.name }}</td>
+                <td class="mono" style="color:#4f8ef7">{{ acc.account }}</td>
+                <td>{{ acc.branch }}</td>
+                <td style="color:#4a5a70">{{ acc.country ?? "—" }}</td>
+                <td style="color:#4a5a70">{{ acc.joinedAt }}</td>
+                <td>
+                  @if (acc.isActive) {
+                  <span class="badge-ok">啟用</span>
+                  } @else {
+                  <span class="badge-err">停權</span>
+                  }
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <button class="btn btn-sm btn-ghost-gold" (click)="resetPasswordAccount(acc.id)">重設密碼</button>
+                    @if (acc.isActive) {
+                    <button class="btn btn-sm btn-ghost-red" (click)="toggleAccount(acc.id)">停權</button>
+                    } @else {
+                    <button class="btn btn-sm btn-ghost-green" (click)="toggleAccount(acc.id)">復權</button>
+                    }
+                    <button class="btn btn-sm btn-ghost-purple"
+                      (click)="adminChangeRoleAction(acc.id, 'REGION_MANAGER')">升為分店長</button>
+                    <button class="btn btn-sm btn-ghost-teal"
+                      (click)="adminChangeRoleAction(acc.id, 'STAFF')">降為員工</button>
+                    <button class="btn btn-sm btn-ghost-amber" (click)="openTransferBranch(acc.id)">調換分店</button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
+
+      <!-- 員工列表 -->
+      @if (userSubTab() === "staff") {
+      <div class="content-card">
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>姓名</th>
+                <th>帳號</th>
+                <th>所屬分店</th>
+                <th>國家</th>
+                <th>入職日期</th>
+                <th>狀態</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (filteredStaffAccounts().length === 0) {
+              <td colspan="7" style="text-align:center; color:#8892b0; padding:24px">
+                @if (accountBranchFilter()) {
+                此分店尚無員工帳號
+                } @else {
+                尚無員工帳號
+                }
+              </td>
+              }
+              @for (acc of filteredStaffAccounts(); track acc.id) {
+              <tr>
+                <td style="font-weight:600">{{ acc.name }}</td>
+                <td class="mono" style="color:#3ecf8e">{{ acc.account }}</td>
+                <td>{{ acc.branch }}</td>
+                <td style="color:#4a5a70">{{ acc.country ?? "—" }}</td>
+                <td style="color:#4a5a70">{{ acc.joinedAt }}</td>
+                <td>
+                  @if (acc.isActive) {
+                  <span class="badge-ok">啟用</span>
+                  } @else {
+                  <span class="badge-err">停權</span>
+                  }
+                </td>
+                <td>
+                  <div class="d-flex gap-1 flex-wrap">
+                    <button class="btn btn-sm btn-ghost-gold" (click)="resetPasswordAccount(acc.id)">重設密碼</button>
+                    @if (acc.isActive) {
+                    <button class="btn btn-sm btn-ghost-red" (click)="toggleAccount(acc.id)">停權</button>
+                    } @else {
+                    <button class="btn btn-sm btn-ghost-green" (click)="toggleAccount(acc.id)">復權</button>
+                    }
+                    <button class="btn btn-sm btn-ghost-purple"
+                      (click)="adminChangeRoleAction(acc.id, 'REGION_MANAGER')">升為分店長</button>
+                    <button class="btn btn-sm btn-ghost-blue"
+                      (click)="adminChangeRoleAction(acc.id, 'MANAGER_AGENT')">升為副店長</button>
+                    <button class="btn btn-sm btn-ghost-amber" (click)="openTransferBranch(acc.id)">調換分店</button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ════════════════════════════════════════
+      頁籤 2：分店管理（對應 global_area 資料表）
+      ════════════════════════════════════════ -->
+    @if (activeTab() === "branches") {
+    <div>
+      <div class="d-flex justify-content-between align-items-center mb-0">
+        <div>
+          <div class="page-title mb-0">分店管理</div>
+          <div class="page-sub">
+            目前共 {{ branchRows().length }} 間分店
+          </div>
+        </div>
+
+        <button class="btn btn-sm btn-gold" (click)="openAddBranch()">
+          + 新增分店
+        </button>
+      </div>
+
+      <div class="content-card">
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>分店名稱</th>
+                <th>國家</th>
+                <th>地址</th>
+                <th>電話</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (branchRows().length === 0) {
+              <tr>
+                <td colspan="5" style="text-align:center; color:#8892b0; padding:24px">
+                  尚無分店資料
+                </td>
+              </tr>
+              }
+
+              @for (b of branchRows(); track b.id) {
+              <tr>
+                <td style="font-weight: 600; color: #1a2840">
+                  {{ b.name }}
+                </td>
+                <td>{{ b.country }}</td>
+                <td style="font-size: 0.8rem; color: #4a5a70">
+                  {{ b.address || "—" }}
+                </td>
+                <td class="mono" style="font-size: 0.8rem">
+                  {{ b.phone || "—" }}
+                </td>
+                <td>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-sm btn-ghost-gold" (click)="openEditBranch(b.id)">
+                      編輯
+                    </button>
+                    <button class="btn btn-sm btn-ghost-red" (click)="requestDeleteBranch(b.id)">
+                      刪除
+                    </button>
+                  </div>
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ════════════════════════════════════════
+          頁籤 3：國家基本設定
+          ════════════════════════════════════════ -->
+    <!-- @if (activeTab() === "tax") { ... } 稅率設定暫時隱藏 -->
+    @if (activeTab() === "tax") {
+    <div>
+      <div class="page-title">國家基本設定</div>
+
+      <!-- ── 稅率設定 + 折扣上限：整合常駐區塊 ── -->
+      <div class="tax-combined-block">
+        <!-- 左卡：稅率 + 編輯入口 -->
+        <div class="content-card">
+          <div class="d-flex justify-content-between align-items-center mb-1">
+            <div>
+              <div class="card-title mb-0">各國稅率一覽</div>
+              <div style="font-size: 0.72rem; color: #8892b0; margin-top: 2px">
+                共 {{ taxes().length }} 個國家／地區
+              </div>
+            </div>
+            <button class="btn btn-sm btn-gold" (click)="openAddCountry()">
+              <span style="font-size: 1rem; line-height: 1">＋</span> 新增國家
+            </button>
+          </div>
+
+          @for (tax of taxes(); track tax.id) {
+          <div class="tax-row" style="
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 10px;
+                    justify-content: center;
+                  ">
+            <!-- 國家標頭 -->
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="tax-country-name">{{ tax.country }}</div>
+                <div class="tax-meta-row">
+                  <span class="tax-currency-badge">{{ tax.currency }}</span>
+                  @if (!tax.editing) {
+                  <span class="tax-type-badge" [class.inclusive]="tax.taxType === 'INCLUSIVE'"
+                    [class.exclusive]="tax.taxType === 'EXCLUSIVE'">
+                    {{
+                    tax.taxType === "INCLUSIVE" ? "內含稅" : "外加稅"
+                    }}
+                  </span>
+                  }
+                </div>
+              </div>
+              @if (!tax.editing) {
+              <div class="d-flex align-items-center gap-2">
+                <div class="tax-rate-badge">
+                  <span class="tax-rate-num mono">{{ tax.rate }}</span>
+                  <span class="tax-rate-unit">%</span>
+                </div>
+                <button class="btn btn-sm btn-ghost-gold" (click)="startEditTax(tax.id)">
+                  修改
+                </button>
+              </div>
+              }
+            </div>
+
+            <!-- 編輯模式 -->
+            @if (tax.editing) {
+            <div class="d-flex flex-wrap gap-3 align-items-end">
+              <div>
+                <label style="
+                            font-size: 0.72rem;
+                            color: #4a5a70;
+                            display: block;
+                            margin-bottom: 4px;
+                          ">稅率（%）</label>
+                <div class="d-flex align-items-center gap-1">
+                  <input type="number" class="form-control form-control-sm form-ctrl mono" [(ngModel)]="tax.editRate"
+                    min="0" max="100" style="width: 80px; text-align: right" />
+                  <span style="color: #4a5a70; font-size: 0.85rem">%</span>
+                </div>
+              </div>
+              <div>
+                <label style="
+                            font-size: 0.72rem;
+                            color: #4a5a70;
+                            display: block;
+                            margin-bottom: 4px;
+                          ">稅種</label>
+                <select class="form-control form-control-sm form-ctrl" [(ngModel)]="tax.editTaxType">
+                  <option value="INCLUSIVE">內含稅</option>
+                  <option value="EXCLUSIVE">外加稅</option>
+                </select>
+              </div>
+              <div class="d-flex gap-2">
+                <button class="btn btn-sm btn-gold" (click)="saveTax(tax.id)">
+                  ✓ 儲存
+                </button>
+                <button class="btn btn-sm btn-ghost-red" (click)="cancelEditTax(tax.id)">
+                  ✕ 取消
+                </button>
+              </div>
+            </div>
+            }
+          </div>
+          }
+        </div>
+
+      </div>
+
+      <!-- 即時匯率 -->
+      <div class="content-card" style="margin-top: 20px">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <div class="card-title mb-0">即時匯率</div>
+            <div style="font-size: 0.72rem; color: #8892b0; margin-top: 2px">
+              來源：匯率 API（TWD 基準）
+              @if (latestRateUpdatedAt()) {
+              ・上次更新：{{ formatRateUpdatedAt(latestRateUpdatedAt()) }}
+              }
+            </div>
+          </div>
+        </div>
+        @if (ratesLoading()) {
+        <div style="text-align: center; color: #8a9ab0; padding: 32px 0">
+          載入中…
+        </div>
+        }
+        @if (rateError()) {
+        <div style="
+              color: #b42318;
+              background: rgba(244, 63, 94, 0.08);
+              border: 1px solid rgba(244, 63, 94, 0.2);
+              border-radius: 6px;
+              padding: 10px 12px;
+              margin-bottom: 12px;
+              font-size: 0.85rem;
+            ">
+          {{ rateError() }}
+        </div>
+        }
+        @if (!ratesLoading()) {
+        @if (allRates().length > 0) {
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>幣別</th>
+                <th>兌換率（相對 TWD）</th>
+                <th>更新時間</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (r of allRates(); track r.id) {
+              <tr>
+                <td>
+                  <span class="tax-currency-badge">{{
+                    r.currencyCode
+                    }}</span>
+                </td>
+                <td class="mono" style="color: #b08540">
+                  {{ formatRate(r.rateToTwd) }}
+                </td>
+                <td style="color: #8a9ab0; font-size: 0.8rem">
+                  {{ formatRateUpdatedAt(r.updatedAt) }}
+                </td>
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        } @else {
+        <div style="text-align: center; color: #8a9ab0; padding: 32px 0">
+          尚無匯率資料，請點擊「重新整理」或選擇日期查詢
+        </div>
+        }
+        }
+      </div>
+    </div>
+    }
+
+    <!-- ════════════════════════════════════════
+      頁籤 4：會員設定（各國折扣上限 + 累積次數）
+      ════════════════════════════════════════ -->
+    @if (activeTab() === "member") {
+    <div>
+      <div class="page-title">會員設定</div>
+
+
+      <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <div class="card-title mb-0">各國會員優惠設定</div>
+            <div style="font-size:0.72rem; color:#8892b0; margin-top:2px">
+              共 {{ memberData().length }} 個國家／地區
+            </div>
+          </div>
+          <button class="btn btn-gold btn-sm" style="font-size:0.78rem; padding:5px 14px"
+            (click)="openAddMemberLimit()">
+            + 新增設定
+          </button>
+        </div>
+
+        @if (taxes().length === 0) {
+        <div style="text-align:center; color:#8892b0; padding:48px 0; font-size:0.88rem">
+          目前無任何國家資料，請先至「國家基本設定」新增國家
+        </div>
+        } @else if (memberData().length === 0) {
+        <div style="text-align:center; color:#8892b0; padding:48px 0; font-size:0.88rem">
+          目前尚未建立會員優惠設定，請點擊右上角「＋ 新增設定」建立第一筆設定
+        </div>
+
+        }
+
+        @for (row of memberData(); track row.tax.id) {
+        <div class="tax-row" style="align-items:center; padding:16px; gap:16px">
+
+          <!-- 左：國家識別 -->
+          <div class="d-flex align-items-center gap-3" style="min-width:140px">
+            <div class="tax-region-code">
+              {{ row.tax.countryCode || row.tax.currency.slice(0, 2) }}
+            </div>
+            <div>
+              <div class="tax-country-name">{{ row.tax.country }}</div>
+              <span class="tax-currency-badge">{{ row.tax.currency }}</span>
+            </div>
+          </div>
+
+          <!-- 中：數值顯示 或 編輯輸入（flex:1） -->
+          <div style="flex:1; padding-left:28px">
+            @if (editingMemberRegionId() !== row.tax.id) {
+            <!-- 顯示模式 -->
+            <div class="d-flex align-items-center gap-4 flex-wrap">
+              <div class="d-flex align-items-center gap-2">
+                <span style="color:#8892b0; font-size:0.8rem">上限</span>
+                <div class="tax-rate-badge" style="min-width:80px">
+                  <span class="tax-rate-num mono" style="font-size:0.95rem">{{ row.disc.usageCap }}</span>
+                </div>
+                <span class="tax-currency-badge">{{ row.tax.currency }}</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <span style="color:#8892b0; font-size:0.8rem">累積</span>
+                <div class="tax-rate-badge" style="min-width:60px">
+                  <span class="tax-rate-num mono" style="font-size:0.95rem">
+                    {{ row.disc.count }}
+                  </span>
+                </div>
+                <span class="tax-currency-badge">次</span>
+              </div>
+            </div>
+            } @else {
+            <!-- 編輯模式 -->
+            <div class="d-flex gap-3 flex-wrap align-items-start">
+              <div style="min-width: 160px">
+                <label style="font-size:0.7rem; color:#8892b0; display:block; margin-bottom:4px">
+                  活動折扣金額上限（{{ row.tax.currency }}）
+                </label>
+
+                <div class="d-flex align-items-center gap-1">
+                  <input type="number" class="form-control form-control-sm form-ctrl mono" [ngModel]="editMemberLimit()"
+                    (ngModelChange)="editMemberLimit.set($event)" min="0" style="width:110px; text-align:right" />
+                  <span style="color:#4a5a70; font-size:0.82rem">
+                    {{ row.tax.currency }}
+                  </span>
+                </div>
+
+                <div style="font-size:0.66rem; color:#8892b0; margin-top:2px">
+                  單次可折抵金額上限
+                </div>
+              </div>
+
+              <div style="min-width: 150px">
+                <label style="font-size:0.7rem; color:#8892b0; display:block; margin-bottom:4px">
+                  折扣累積次數門檻
+                </label>
+
+                <div class="d-flex align-items-center gap-1">
+                  <input type="number" class="form-control form-control-sm form-ctrl mono" [ngModel]="editMemberCap()"
+                    (ngModelChange)="editMemberCap.set($event)" min="0" style="width:90px; text-align:right" />
+                  <span style="color:#4a5a70; font-size:0.82rem">
+                    次
+                  </span>
+                </div>
+
+                <div style="font-size:0.66rem; color:#8892b0; margin-top:2px">
+                  累積達此次數可折扣
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- 右：操作按鈕 -->
+          <div style="min-width:120px; display:flex; justify-content:flex-end; align-items:center; gap:6px">
+            @if (editingMemberRegionId() !== row.tax.id) {
+            <button class="btn btn-sm btn-ghost-gold" (click)="startEditMember(row.tax.id)">修改</button>
+            } @else {
+            <button class="btn btn-sm btn-gold" (click)="saveMemberSettings(row.tax.id)">✓ 儲存</button>
+            <button class="btn btn-sm btn-ghost-red" (click)="cancelEditMember()">✕ 取消</button>
+            }
+          </div>
+
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- ════════════════════════════════════════
+      頁籤 5：商品管理（Signal 驅動，toggle 即時生效）
+      ════════════════════════════════════════ -->
+    @if (activeTab() === "products") {
+    <div>
+      <!-- 頁面標題列 -->
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        <div>
+          <div class="page-title mb-0">商品管理</div>
+          <div class="page-sub">
+            @if (showTrash()) {
+            已刪除商品共 {{ trashProducts().length }} 筆
+            } @else {
+            目前共 {{ products().length }} 筆商品
+            }
+          </div>
+        </div>
+
+        @if (!showTrash()) {
+        <button class="btn btn-sm btn-gold" (click)="openAddProduct()">
+          + 新增商品
+        </button>
+        }
+      </div>
+
+      <!-- 白底卡片 -->
+      <div class="content-card">
+        <!-- 篩選工具列 -->
+        <div class="d-flex gap-2 mb-4 align-items-center flex-wrap">
+          @if (!showTrash()) {
+          <select class="form-select form-select-sm form-ctrl" style="max-width: 160px" [ngModel]="productStyleFilter()"
+            (change)="onProductStyleFilter($event)">
+            <option value="">全部風格</option>
+            <option *ngFor="let s of styleOptions()" [value]="s">
+              {{ s }}
+            </option>
+          </select>
+
+          <select class="form-select form-select-sm form-ctrl" style="max-width: 160px"
+            [ngModel]="productCategoryFilter()" (change)="onProductCategoryFilter($event)">
+            <option value="">全部分類</option>
+            <option *ngFor="let c of categoryOptions()" [value]="c">
+              {{ c }}
+            </option>
+          </select>
+
+          <input type="text" class="form-control form-control-sm form-ctrl" placeholder="搜尋商品名稱…"
+            style="max-width: 240px" [ngModel]="productSearch()" (input)="onProductSearch($event)" />
+
+          @if (filteredProducts().length < products().length) { <span style="font-size: 0.76rem; color: #4a5a70">
+            篩選結果 {{ filteredProducts().length }} / {{ products().length }} 項
+            </span>
+            }
+
+            @if (hasProductFilter()) {
+            <button class="btn btn-sm btn-ghost-gold" type="button" (click)="resetProductFilters()">
+              重置
+            </button>
+            }
+            }
+
+            <button class="btn btn-sm btn-ghost-red ms-auto" type="button" (click)="toggleProductTrash()">
+              @if (showTrash()) {
+              返回商品列表
+              } @else {
+              查看已刪除商品
+              }
+            </button>
+        </div>
+
+        <!-- 商品列表灰底區 -->
+        <div style="
+        background: #f6f8fb;
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 14px;
+        padding: 16px;
+      ">
+          <div class="row g-3">
+            @if (showTrash()) {
+            @for (p of trashProducts(); track p.id) {
+            <div class="col-md-6">
+              <div class="product-row" style="opacity: 0.75">
+                <div class="product-thumb"
+                  [style.background]="p.foodImgBase64 ? 'url(' + p.foodImgBase64 + ') center/cover' : '#eef2f7' ">
+                  @if (!p.foodImgBase64) {
+                  <span style="font-size:0.7rem; color:#8892b0">無圖片</span>
+                  }
+                </div>
+
+                <div class="flex-grow-1">
+                  <div style="font-weight: 600; color: #1a2840">
+                    {{ p.name }}
+                  </div>
+
+                  <div class="d-flex gap-1 flex-wrap mt-1">
+                    <span
+                      style="font-size: 0.7rem; color: #4a5a70; background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.18); border-radius: 999px; padding: 2px 8px;">
+                      {{ p.style || '未分類風格' }}
+                    </span>
+                    <span
+                      style="font-size: 0.7rem; color: #4a5a70; background: rgba(196,151,86,0.12); border: 1px solid rgba(196,151,86,0.22); border-radius: 999px; padding: 2px 8px;">
+                      {{ p.category || '未分類餐點' }}
+                    </span>
+                  </div>
+                </div>
+
+                <span class="badge-err">已刪除</span>
+              </div>
+            </div>
+            } @empty {
+            <div style="text-align:center; color:#8892b0; padding:48px 0; font-size:0.88rem; width:100%">
+              目前沒有已刪除商品
+            </div>
+            }
+            } @else {
+            @for (p of filteredProducts(); track p.id) {
+            <div class="col-md-6">
+              <div class="product-row" [style.opacity]="p.isActive ? '1' : '0.55'">
+                <div class="product-thumb"
+                  [style.background]="p.foodImgBase64 ? 'url(' + p.foodImgBase64 + ') center/cover' : '#eef2f7'">
+                  @if (!p.foodImgBase64) {
+                  <span style="font-size:0.7rem; color:#8892b0">無圖片</span>
+                  }
+                </div>
+
+                <div class="flex-grow-1">
+                  <div style="font-weight: 600; color: #1a2840">
+                    {{ p.name }}
+                  </div>
+
+                  <div class="d-flex gap-1 flex-wrap mt-1">
+                    <span style="
+            font-size: 0.7rem;
+            color: #4a5a70;
+            background: rgba(79,142,247,0.1);
+            border: 1px solid rgba(79,142,247,0.18);
+            border-radius: 999px;
+            padding: 2px 8px;
+          ">
+                      {{ p.style || '未分類風格' }}
+                    </span>
+
+                    <span style="
+            font-size: 0.7rem;
+            color: #4a5a70;
+            background: rgba(196,151,86,0.12);
+            border: 1px solid rgba(196,151,86,0.22);
+            border-radius: 999px;
+            padding: 2px 8px;
+          ">
+                      {{ p.category || '未分類餐點' }}
+                    </span>
+                  </div>
+                </div>
+
+                <div class="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                  <button class="btn btn-sm btn-ghost-gold" style="
+          font-size: 0.72rem;
+          padding: 3px 11px;
+          white-space: nowrap;
+        " (click)="openEditProduct(p.id)">
+                    ✏️ 編輯
+                  </button>
+
+                  <button class="btn btn-sm btn-ghost-red" style="
+          font-size: 0.72rem;
+          padding: 3px 11px;
+          white-space: nowrap;
+        " (click)="deleteProduct(p.id)">
+                    刪除
+                  </button>
+
+                  @if (!p.isActive) {
+                  <span class="badge-err">下架</span>
+                  } @else {
+                  <span class="badge-ok">上架</span>
+                  }
+
+                  <div class="form-check form-switch mb-0">
+                    <input class="form-check-input" type="checkbox" [checked]="p.isActive"
+                      (change)="toggleProduct(p.id)" />
+                  </div>
+                </div>
+              </div>
+            </div>
+            } @empty {
+            <div style="text-align:center; color:#8892b0; padding:48px 0; font-size:0.88rem; width:100%">
+              @if (products().length === 0) {
+              尚無商品資料，請點擊右上角「＋ 新增商品」建立第一筆商品
+              } @else {
+              查無符合條件的商品，請調整風格、分類或搜尋關鍵字
+              }
+            </div>
+            }
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- ════════════════════════════════════════
+          頁籤 6：活動管理（Signal 驅動，toggle 即時生效）
+          ════════════════════════════════════════ -->
+    @if (activeTab() === "promotions") {
+    <div>
+      <!-- 頁面標題列 -->
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <div class="page-title">活動管理</div>
+        </div>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-gold" (click)="openAddPromo()">
+            + 新增活動
+          </button>
+        </div>
+      </div>
+
+      <!-- 活動卡片格 -->
+      <div class="promo-grid">
+        @for (promo of promos(); track promo.id) {
+        <div class="promo-card" [style.opacity]="promo.ended ? '0.6' : '1'" style="cursor: pointer"
+          (click)="openPromoDetail(promo)">
+          <!-- 頂部色條 -->
+          <div class="promo-card-bar" [style.background]="promo.badgeColor || promo.color"></div>
+
+          <div class="promo-card-body">
+
+            <!-- 封面圖 -->
+            @if (promo.image) {
+            <img [src]="promo.image" alt="封面" (error)="promo.image = ''" style="
+                width: 100%;
+                height: 100px;
+                object-fit: cover;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                border: 1px solid rgba(0, 0, 0, 0.06);
+              " />
+            } @else {
+            <div style="
+                width: 100%;
+                height: 100px;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                border: 1px dashed rgba(148, 163, 184, 0.45);
+                background: #f6f8fb;
+                color: #8892b0;
+                font-size: 0.78rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+              ">
+              無圖片
+            </div>
+            }
+
+            <div class="promo-title">{{ promo.title }}</div>
+            @if (promo.description) {
+            <div class="promo-desc">{{ promo.description }}</div>
+            }
+            <div class="promo-meta">
+              <span>{{ promo.rawStartTime }} ～ {{ promo.rawEndTime }}</span>
+            </div>
+          </div>
+
+          <!-- 卡片底部：狀態 + 開關 + 操作 -->
+          <div class="promo-card-foot" (click)="$event.stopPropagation()">
+            <div class="d-flex align-items-center gap-2">
+              @if (promo.ended) {
+              <span class="badge-err">已結束</span>
+              } @else if (promo.isActive) {
+              <span class="badge-ok">進行中</span>
+              } @else {
+              <span class="badge-warn">已暫停</span>
+              }
+              <div class="form-check form-switch mb-0 ms-auto">
+                <input class="form-check-input" type="checkbox" [checked]="promo.isActive" [disabled]="promo.ended"
+                  (change)="togglePromo(promo.id)" />
+              </div>
+            </div>
+            <div class="d-flex gap-2 mt-2">
+              @if (promo.type === "promotion") {
+              <button class="btn btn-sm btn-ghost-gold" style="font-size: 0.72rem" (click)="openAddGift(promo.id)">
+                ＋ 新增門檻
+              </button>
+              }
+              <button class="btn btn-sm btn-ghost-red" style="font-size: 0.72rem"
+                [class.promo-delete-pulse]="promo.ended" (click)="deletePromo(promo.id)">
+                刪除
+              </button>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+
+    <!-- ════════════════════════════════════════
+  頁籤 7：財務報表
+  ════════════════════════════════════════ -->
+    @if (activeTab() === "finance") {
+    <div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <div class="page-title mb-0">財務報表</div>
+          <div class="page-sub">營業額、成本與分店營運概況</div>
+        </div>
+      </div>
+
+      <!-- 查詢條件 -->
+      <div class="content-card mb-4">
+        <div class="card-title mb-3">查詢條件</div>
+
+        <div class="d-flex flex-wrap gap-3 align-items-end">
+          <div style="width: 150px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">國家</div>
+            <select class="form-control form-ctrl" [ngModel]="financeCountry()"
+              (ngModelChange)="onFinanceCountryChange($event)">
+              <option value="全部">全部</option>
+              @for (country of financeCountries(); track country) {
+              <option [value]="country">{{ country }}</option>
+              }
+            </select>
+          </div>
+
+          <div style="width: 190px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">分店</div>
+            <select class="form-control form-ctrl" [ngModel]="financeBranchName()"
+              (ngModelChange)="onFinanceBranchChange($event)">
+              <option value="">全部分店</option>
+              @for (b of financeBranchOptions(); track b.id) {
+              <option [value]="b.name">{{ b.country }}｜{{ b.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div style="width: 150px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">報表類型</div>
+            <select class="form-control form-ctrl" [ngModel]="financeMode()"
+              (ngModelChange)="onFinanceModeChange($event)">
+              <option value="month">月報表</option>
+              <option value="monthRange">月份區間</option>
+              <option value="dateRange">日期區間</option>
+            </select>
+          </div>
+
+          @if (financeMode() === "month") {
+          <div style="width: 160px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">查詢月份</div>
+            <input type="month" class="form-control form-ctrl" [ngModel]="financeMonth()"
+              (ngModelChange)="financeMonth.set($event)" />
+          </div>
+          }
+
+          @if (financeMode() === "monthRange") {
+          <div style="width: 160px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">開始月份</div>
+            <input type="month" class="form-control form-ctrl" [ngModel]="financeStartMonth()"
+              (ngModelChange)="financeStartMonth.set($event)" />
+          </div>
+
+          <div style="width: 160px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">結束月份</div>
+            <input type="month" class="form-control form-ctrl" [ngModel]="financeEndMonth()"
+              (ngModelChange)="financeEndMonth.set($event)" />
+          </div>
+          }
+
+          @if (financeMode() === "dateRange") {
+          <div style="width: 160px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">開始日期</div>
+            <input type="date" class="form-control form-ctrl" [ngModel]="financeStartDate()"
+              (ngModelChange)="financeStartDate.set($event)" />
+          </div>
+
+          <div style="width: 160px">
+            <div style="font-size: 0.78rem; color: #8a9ab0; margin-bottom: 4px">結束日期</div>
+            <input type="date" class="form-control form-ctrl" [ngModel]="financeEndDate()"
+              (ngModelChange)="financeEndDate.set($event)" />
+          </div>
+          }
+
+          <button class="btn btn-sm btn-gold" type="button" [disabled]="financeLoading()"
+            (click)="queryFinanceReport()">
+            @if (financeLoading()) {
+            載入中…
+            } @else {
+            查詢報表
+            }
+          </button>
+          @if (canConvertFinanceToTwd()) {
+          <button class="btn btn-sm" type="button"
+            [style.background]="showFinanceTwdConversion() ? '#2563eb' : 'transparent'"
+            [style.color]="showFinanceTwdConversion() ? '#fff' : '#2563eb'" [style.border]="'1.5px solid #2563eb'"
+            [style.border-radius]="'8px'" [style.font-weight]="'600'" (click)="toggleFinanceTwdConversion()">
+            💱 台幣匯率轉換
+          </button>
+          }
+          <button class="btn btn-sm btn-ghost-gold" type="button" (click)="resetFinanceFilters()">
+            重置
+          </button>
+        </div>
+
+        @if (financeError()) {
+        <div style="
+        margin-top: 14px;
+        color: #b42318;
+        background: rgba(244, 63, 94, 0.08);
+        border: 1px solid rgba(244, 63, 94, 0.2);
+        border-radius: 6px;
+        padding: 10px 12px;
+        font-size: 0.85rem;
+      ">
+          {{ financeError() }}
+        </div>
+        }
+      </div>
+      @if (!financeLoading() && !hasFinanceResult()) {
+      <div class="content-card" style="text-align:center; padding:64px 20px; color:#8a9ab0">
+        <div style="font-size:2rem; margin-bottom:12px; opacity:0.35">📊</div>
+        <div style="font-size:0.9rem; font-weight:500; color:#4a5a70; margin-bottom:6px">
+          尚無報表資料
+        </div>
+        <div style="font-size:0.8rem">
+          請選擇查詢條件後點擊「查詢報表」
+        </div>
+      </div>
+      }
+      @if (hasFinanceResult() && isFinanceAllCountryMode()) {
+      <div class="content-card mb-4" style="text-align:center; color:#8892b0; padding:32px 20px">
+        <div style="font-weight:700; color:#4a5a70; margin-bottom:6px">
+          已選擇全部國家
+        </div>
+        <div style="font-size:0.86rem; line-height:1.7">
+          因各國幣別不同，總營業額、成本統計卡與趨勢圖不進行跨幣別加總。<br />
+          請查看下方分店明細，或選擇單一國家後查看統計與趨勢。
+        </div>
+      </div>
+      }
+      @if (shouldShowFinanceSummary()) {
+      <!-- 統計卡片 -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-label">
+              @if (financeMode() === "month") { 本月營業額 }
+              @else { 期間營業額 }
+            </div>
+            <div class="finance-num">
+              {{ financeTotalAmount() | number: "1.0-0" }}
+              <span class="finance-currency-badge">{{ financeDisplayCurrency() }}</span>
+            </div>
+            <div class="stat-sub">
+              @if (financeMode() === "month") { {{ financeMonth() }} }
+              @else if (financeMode() === "monthRange") { {{ financeStartMonth() }} ～ {{ financeEndMonth() }} }
+              @else { {{ financeStartDate() }} ～ {{ financeEndDate() }} }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-label">
+              @if (financeMode() === "month") { 上月營業額 }
+              @else { 分店筆數 }
+            </div>
+            <div class="finance-num">
+              @if (financeMode() === "month") {
+              {{ financeLastTotalAmount() | number: "1.0-0" }}
+              <span class="finance-currency-badge">{{ financeDisplayCurrency() }}</span>
+              } @else {
+              {{ financeDisplayRows().length }}
+              }
+            </div>
+            <div class="stat-sub">
+              @if (financeMode() === "month") { 比較基準 }
+              @else { 目前篩選結果 }
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-label">
+              @if (financeMode() === "month") { 本月成本 }
+              @else { 期間成本 }
+            </div>
+            <div class="finance-num" style="color: #f87171">
+              {{ financeTotalCost() | number: "1.0-0" }}
+              <span class="finance-currency-badge">{{ financeDisplayCurrency() }}</span>
+            </div>
+            <div class="stat-sub">成本佔比 {{ financeCostRatio() | number: "1.0-1" }}%</div>
+          </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+          <div class="stat-card">
+            <div class="stat-label">
+              @if (financeMode() === "month") { 成長率 }
+              @else { 平均營業額 }
+            </div>
+            <div class="finance-num"
+              [style.color]="financeMode() === 'month' && financeGrowth() < 0 ? '#ef4444' : '#16a34a'">
+              @if (financeMode() === "month") {
+              {{ financeGrowth() | number: "1.1-1" }}%
+              } @else {
+              {{ (financeDisplayRows().length ? financeTotalAmount() / financeDisplayRows().length : 0) | number:
+              "1.0-0" }}
+              }
+            </div>
+            <div class="stat-sub">
+              @if (financeMode() === "month") { 相較上月 }
+              @else { 每分店平均 }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+      @if (shouldShowFinanceSummary()) {
+      <!-- 營收趨勢圖 -->
+      <div class="content-card mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <div class="card-title mb-0">營收趨勢</div>
+            <div style="font-size: 0.72rem; color: #8892b0; margin-top: 2px">
+              @if (financeMode() === "dateRange") {
+              日期區間模式以分店彙總呈現
+              } @else {
+              依月份呈現營業額與成本
+              }
+            </div>
+          </div>
+
+          <div class="d-flex gap-3 align-items-center">
+            <div class="d-flex align-items-center gap-1">
+              <span
+                style="display:inline-block; width:10px; height:10px; border-radius:999px; background:#d6b47c"></span>
+              <span style="font-size:0.72rem; color:#8a9ab0">營業額</span>
+            </div>
+
+            <div class="d-flex align-items-center gap-1">
+              <span
+                style="display:inline-block; width:10px; height:10px; border-radius:999px; background:#f87171"></span>
+              <span style="font-size:0.72rem; color:#8a9ab0">成本</span>
+            </div>
+          </div>
+        </div>
+
+        @if (financeChartRows().length === 0) {
+        <div style="text-align:center; color:#8892b0; padding:48px 0">
+          目前查詢條件下沒有報表資料
+        </div>
+        } @else {
+        <div style="height: 280px; display: flex; align-items: end; gap: 18px; padding: 16px 4px 4px">
+          @for (row of financeChartRows(); track row.label) {
+          <div style="flex:1; display:flex; flex-direction:column; align-items:center; gap:8px; min-width:62px">
+            <div style="width:100%; display:flex; align-items:end; gap:5px; height:160px">
+              <div style="flex:1; background:#d6b47c; border-radius:8px 8px 2px 2px"
+                [style.height.%]="(row.revenue / financeChartMax()) * 100"></div>
+              <div style="flex:1; background:#f87171; border-radius:8px 8px 2px 2px"
+                [style.height.%]="(row.cost / financeChartMax()) * 100"></div>
+            </div>
+            <div style="font-size:0.72rem; color:#8892b0; text-align:center">
+              {{ row.label }}
+            </div>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+
+      <!-- 分店明細表 -->
+      @if (hasFinanceResult()) {
+
+      <div class="content-card">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <div class="card-title mb-0">分店明細</div>
+            <div style="font-size: 0.72rem; color: #8892b0; margin-top: 2px">
+              @if (financeMode() === "month") {
+              月報表
+              } @else {
+              目前查詢結果
+              }
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrapper">
+          <table class="table table-borderless table-dark-custom mb-0">
+            <thead>
+              <tr>
+                <th>分店名稱</th>
+                <th>國家</th>
+                <th>
+                  @if (financeMode() === "month") { 本月營業額 }
+                  @else { 期間營業額 }
+                </th>
+                @if (financeMode() === "month") {
+                <th>上月營業額</th>
+                }
+                <th>
+                  @if (financeMode() === "month") { 本月成本 }
+                  @else { 期間成本 }
+                </th>
+                @if (financeMode() === "month") {
+                <th>成長率</th>
+                }
+              </tr>
+            </thead>
+
+            <tbody>
+              @if (financeDisplayRows().length === 0) {
+              <tr>
+                <td [attr.colspan]="financeMode() === 'month' ? 6 : 4"
+                  style="text-align:center; color:#8892b0; padding:24px">
+                  尚無符合條件的財報資料
+                </td>
+              </tr>
+              }
+
+              @for (row of financeDisplayRows(); track row.regionsName + row.branchName) {
+              <tr>
+                <td style="font-weight:600">{{ row.branchName }}</td>
+                <td>{{ row.regionsName }}</td>
+                <td class="mono" style="color:#b08540">
+                  {{ row.currentAmount | number: "1.0-0" }}
+                  <span class="finance-currency-badge">
+                    @if (showFinanceTwdConversion() && canConvertFinanceToTwd()) {
+                    TWD
+                    } @else {
+                    {{ financeCurrencyByCountry(row.regionsName) }}
+                    }
+                  </span>
+                </td>
+
+                @if (financeMode() === "month") {
+                <td class="mono">
+                  {{ (row.lastAmount ?? 0) | number: "1.0-0" }}
+                  <span class="finance-currency-badge">
+                    @if (showFinanceTwdConversion() && canConvertFinanceToTwd()) {
+                    TWD
+                    } @else {
+                    {{ financeCurrencyByCountry(row.regionsName) }}
+                    }
+                  </span>
+                </td>
+                }
+
+                <td class="mono" style="color:#f87171">
+                  {{ row.currentCost | number: "1.0-0" }}
+                  <span class="finance-currency-badge">
+                    @if (showFinanceTwdConversion() && canConvertFinanceToTwd()) {
+                    TWD
+                    } @else {
+                    {{ financeCurrencyByCountry(row.regionsName) }}
+                    }
+                  </span>
+                </td>
+
+                @if (financeMode() === "month") {
+                <td [style.color]="(row.growth ?? 0) < 0 ? '#ef4444' : '#16a34a'" style="font-weight:700">
+                  {{ row.growth ?? 0 | number: "1.1-1" }}%
+                </td>
+                }
+              </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
+    </div>
+    }
+
+
+  </div>
+  <!-- /.main-content -->
+  <!-- ════════════════════════════════════════════════════
+     Modal：確認刪除分店
+     ════════════════════════════════════════════════════ -->
+  @if (deleteBranchConfirm(); as target) {
+  <div class="modal-overlay" (click)="cancelDeleteBranch()">
+    <div class="modal-box" style="max-width: 360px; text-align: center" (click)="$event.stopPropagation()">
+      <div class="modal-bd" style="padding: 32px 24px 20px">
+        <div style="font-size: 2.2rem; margin-bottom: 14px">🗑️</div>
+        <div style="
+            font-size: 1.02rem;
+            font-weight: 700;
+            color: #1a2840;
+            margin-bottom: 10px;
+          ">
+          確認刪除分店
+        </div>
+        <div style="font-size: 0.88rem; color: #4a5a70; line-height: 1.7">
+          確定刪除分店「<strong style="color: #1a2840">{{ target.name }}</strong>」？<br />此操作無法復原。
+        </div>
+      </div>
+      <div class="modal-ft" style="justify-content: center; gap: 12px">
+        <button class="btn btn-sm btn-cancel" (click)="cancelDeleteBranch()">
+          取消
+        </button>
+        <button class="btn btn-sm btn-ghost-red" (click)="confirmDeleteBranch()">
+          確認刪除
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+  <!-- ════════════════════════
+        活動詳情 Modal（#11）
+        ════════════════════════ -->
+  @if (selectedPromo(); as promo) {
+  <div class="promo-sheet-overlay" (click)="closePromoDetail()">
+    <div class="promo-sheet" (click)="$event.stopPropagation()">
+      <!-- ── 圖片 Header ── -->
+      <div class="promo-sheet-hd">
+        @if (promo.image) {
+        <img [src]="promo.image" alt="封面" class="promo-sheet-hd-img" (error)="promo.image = ''" />
+        } @else {
+        <div class="promo-sheet-hd-placeholder" [style.background]="promo.badgeColor || promo.color" style="
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255, 255, 255, 0.82);
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+  ">
+          無圖片
+        </div>
+        }
+        <div class="promo-sheet-hd-gradient"></div>
+        <!-- 標題覆蓋在圖片上 -->
+        <div class="promo-sheet-hd-body">
+          <h2 class="promo-sheet-hd-name">{{ promo.title }}</h2>
+          <div style="font-size: 0.78rem; margin-top: 4px">
+            @if (promo.isActive && !promo.ended) {
+            <span class="badge-ok">進行中</span>
+            } @else if (promo.ended) {
+            <span class="badge-err">已結束</span>
+            } @else {
+            <span class="badge-warn">已暫停</span>
+            }
+          </div>
+        </div>
+        <!-- 關閉按鈕 -->
+        <button class="promo-sheet-close" (click)="closePromoDetail()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- ── 可捲動內容 ── -->
+      <div class="promo-sheet-content">
+        <!-- 日期 -->
+        <div class="promo-sheet-date">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            style="width: 16px; height: 16px; flex-shrink: 0">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+            <line x1="16" y1="2" x2="16" y2="6" />
+            <line x1="8" y1="2" x2="8" y2="6" />
+            <line x1="3" y1="10" x2="21" y2="10" />
+          </svg>
+          <span>{{ promo.rawStartTime }}</span>
+          <span class="promo-sheet-date-sep">—</span>
+          <span>{{ promo.rawEndTime }}</span>
+        </div>
+
+        <!-- 活動描述 -->
+        <div class="promo-sheet-section">
+          <div class="promo-sheet-section-title">活動描述</div>
+
+          @if (promo.description) {
+          <p class="promo-sheet-desc">{{ promo.description }}</p>
+          } @else {
+          <div style="font-size: 0.82rem; color: #8892b0; line-height: 1.7">
+            尚無活動描述
+          </div>
+          }
+        </div>
+
+        <!-- 贈品規則 -->
+        @if (promo.gifts && promo.gifts.length > 0) {
+        <div class="promo-sheet-section">
+          <div class="promo-sheet-section-title">贈品規則</div>
+
+          <div class="promo-gift-list">
+            @for (gift of promo.gifts; track gift.id) {
+            <div class="promo-gift-item">
+              <span class="promo-gift-name">
+                {{ gift.productName }} × {{ gift.quantity === -1 ? "∞" : gift.quantity }}
+              </span>
+
+              <span class="promo-gift-amount">
+                滿 NT${{ gift.fullAmount }}
+              </span>
+            </div>
+            }
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- ── Footer ── -->
+      <div class="promo-sheet-ft">
+        <button class="btn btn-sm btn-ghost-red" (click)="requestDeletePromo(promo)">
+          刪除活動
+        </button>
+        <button class="btn btn-sm btn-gold" (click)="closePromoDetail()">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════
+        Modal：活動進行中警告
+        ════════════════════════════════════════════════════ -->
+  @if (deleteConfirmState()?.type === "active-warning") {
+  <div class="modal-overlay" (click)="cancelDeleteConfirm()">
+    <div class="modal-box" style="max-width: 360px; text-align: center" (click)="$event.stopPropagation()">
+      <div class="modal-bd" style="padding: 32px 24px 20px">
+        <div style="font-size: 2.2rem; margin-bottom: 14px">⚠️</div>
+        <div style="
+                font-size: 1.02rem;
+                font-weight: 700;
+                color: #1a2840;
+                margin-bottom: 10px;
+              ">
+          活動進行中
+        </div>
+        <div style="font-size: 0.88rem; color: #4a5a70; line-height: 1.7">
+          現在活動還在進行中<br /><strong>請先暫停活動 !!</strong>
+        </div>
+      </div>
+      <div class="modal-ft" style="justify-content: center; padding: 14px 20px">
+        <button class="btn btn-sm btn-gold" (click)="cancelDeleteConfirm()">
+          關閉
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- ════════════════════════════════════════════════════
+        Modal：確認刪除（單一 / 批次）
+        ════════════════════════════════════════════════════ -->
+  @if (
+  deleteConfirmState()?.type === "confirm"
+  ) {
+  <div class="modal-overlay" (click)="cancelDeleteConfirm()">
+    <div class="modal-box" style="max-width: 360px; text-align: center" (click)="$event.stopPropagation()">
+      <div class="modal-bd" style="padding: 32px 24px 20px">
+        <div style="font-size: 2.2rem; margin-bottom: 14px">🗑️</div>
+        <div style="
+                font-size: 1.02rem;
+                font-weight: 700;
+                color: #1a2840;
+                margin-bottom: 10px;
+              ">
+          確認刪除
+        </div>
+        <div style="font-size: 0.88rem; color: #4a5a70; line-height: 1.7">
+          請問是否要刪除活動？<br />此操作無法復原。
+        </div>
+      </div>
+      <div class="modal-ft" style="justify-content: center; gap: 12px; padding: 14px 20px">
+        <button class="btn btn-sm btn-ghost-red" (click)="cancelDeleteConfirm()">
+          取消
+        </button>
+        <button class="btn btn-sm btn-gold" (click)="confirmDelete()">
+          是，確認刪除
+        </button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Toast 通知（toastLeaving → CSS 淡出） -->
+  @if (toastMsg()) {
+  <div class="mgr-toast" [class.mgr-toast-leaving]="toastLeaving()">
+    {{ toastMsg() }}
+  </div>
+  }
+</div>
+<!-- /.main-wrapper -->
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增商品
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addProduct") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+
+
+    <div class="modal-hd">
+      <div class="modal-hd-title">
+        {{ editingProductId() !== null ? "✏️ 編輯商品" : "➕ 新增商品" }}
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="mb-3">
+        <label class="modal-label">商品名稱 <span class="required">*</span></label>
+        <input type="text" class="form-control form-ctrl" [(ngModel)]="productDraft.name" placeholder="例：紅燒牛肉麵" />
+      </div>
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="modal-label">料理風格 <span class="required">*</span></label>
+
+          <select class="form-select form-ctrl" [(ngModel)]="productDraft.style">
+            <option value="">請選擇料理風格</option>
+
+            @for (s of styleOptions(); track s) {
+            <option [value]="s">{{ s }}</option>
+            }
+
+            <option [value]="PRODUCT_CUSTOM_VALUE">＋ 自定義料理風格</option>
+          </select>
+
+          @if (productDraft.style === PRODUCT_CUSTOM_VALUE) {
+          <input type="text" class="form-control form-ctrl mt-2" [(ngModel)]="customProductStyle"
+            placeholder="請輸入自定義料理風格" />
+          }
+        </div>
+
+        <div class="col-6">
+          <label class="modal-label">餐點分類 <span class="required">*</span></label>
+
+          <select class="form-select form-ctrl" [(ngModel)]="productDraft.category">
+            <option value="">請選擇餐點分類</option>
+
+            @for (c of categoryOptions(); track c) {
+            <option [value]="c">{{ c }}</option>
+            }
+
+            <option [value]="PRODUCT_CUSTOM_VALUE">＋ 自定義餐點分類</option>
+          </select>
+
+          @if (productDraft.category === PRODUCT_CUSTOM_VALUE) {
+          <input type="text" class="form-control form-ctrl mt-2" [(ngModel)]="customProductCategory"
+            placeholder="請輸入自定義餐點分類" />
+          }
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label class="modal-label">
+          商品圖片
+          @if (editingProductId() === null) {
+          <span class="required">*</span>
+          } @else {
+          <span style="color:#8892b0; font-weight:400">（不更換可留空）</span>
+          }
+        </label>
+
+        @if (productImagePreview()) {
+        <img [src]="productImagePreview()" class="product-img-preview" alt="預覽" />
+        }
+
+        <input type="file" accept="image/*" class="form-control form-ctrl" style="padding: 6px 10px; cursor: pointer"
+          (change)="onProductImageChange($event)" />
+      </div>
+
+      <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-1">
+          <label class="modal-label">商品描述 <span class="required">*</span></label>
+          <button class="btn btn-sm" style="
+        font-size: 0.7rem;
+        padding: 3px 10px;
+        background: #1e3a5f;
+        color: #c49756;
+        border: 1px solid #c49756;
+      " [disabled]="generatingAiDesc()" (click)="generateAiDesc()">
+            {{ generatingAiDesc() ? "AI 生成中…" : "✨ AI 生成文案" }}
+          </button>
+        </div>
+        <textarea class="form-control form-ctrl mt-2" rows="3" style="resize: vertical" placeholder="商品描述，可由 AI 自動生成"
+          [(ngModel)]="productDraft.description"></textarea>
+      </div>
+
+
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      <button class="btn btn-sm btn-gold" (click)="saveProduct()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span>
+        {{ editingProductId() !== null ? "儲存變更" : "確認新增" }}
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Slide-in Panel：新增活動（#11 DESIGN.md 10C）
+      ════════════════════════════════════════════════════ -->
+@if (showPromoPanel()) {
+<!-- 背景遮罩 -->
+<div class="promo-panel-backdrop" (click)="closePromoPanel()"></div>
+<!-- 右側滑入面板 -->
+<div class="promo-panel">
+  <!-- 頂部標題列 -->
+  <div class="promo-panel-hd">
+    <span class="promo-panel-title">新增活動</span>
+    <button class="promo-panel-close" (click)="closePromoPanel()">✕</button>
+  </div>
+  <!-- 捲動內容區 -->
+  <div class="promo-panel-body">
+    <!-- 1. 封面圖片 -->
+    <div class="pp-field">
+      <label class="pp-label">
+        封面圖片 <span class="required">*</span>
+      </label>
+
+      @if (promoDraft.image) {
+      <div class="pp-img-preview">
+        <img [src]="promoDraft.image" alt="封面預覽" />
+        <button class="pp-img-replace" type="button" (click)="promoFileInput.click()">
+          更換圖片
+        </button>
+      </div>
+      } @else {
+      <div class="pp-dropzone" (click)="promoFileInput.click()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <span class="pp-dropzone-label">拖曳圖片或點擊上傳</span>
+        <span class="pp-dropzone-hint">支援 JPG、PNG，建議 1200×675px</span>
+      </div>
+      }
+
+      <input type="file" accept="image/*" style="display: none" #promoFileInput (change)="onPromoImageChange($event)" />
+    </div>
+
+    <!-- 2. 活動名稱 -->
+    <div class="pp-field">
+      <label class="pp-label">
+        活動名稱 <span class="required">*</span>
+      </label>
+      <input type="text" class="form-control form-ctrl" [(ngModel)]="promoDraft.name" placeholder="例：滿額優惠、夏季上新公告" />
+    </div>
+
+    <!-- 3. 贈品規則：必填 -->
+    <div class="pp-section-divider">贈品規則 <span class="required">*</span></div>
+
+    <div class="pp-field">
+      <label class="pp-label">
+        滿額門檻 <span class="required">*</span>
+      </label>
+      <input type="number" class="form-control form-ctrl" [(ngModel)]="promoDraft.giftFullAmount" min="1"
+        placeholder="例：300" />
+      <span class="pp-hint">消費達此金額即可符合贈品條件</span>
+    </div>
+
+    <div class="pp-field">
+      <label class="pp-label">
+        贈品商品 <span class="required">*</span>
+      </label>
+
+      @if (giftProductList().length > 0) {
+      <select class="form-control form-ctrl" [(ngModel)]="promoDraft.giftProductId">
+        <option [ngValue]="null">請選擇贈品商品</option>
+        @for (p of giftProductList(); track p.id) {
+        <option [ngValue]="p.id">{{ p.name }}</option>
+        }
+      </select>
+      } @else {
+      <input type="number" class="form-control form-ctrl" [(ngModel)]="promoDraft.giftProductId" min="1"
+        placeholder="輸入商品 ID" />
+      <span class="pp-hint">目前無商品清單，請先輸入贈品商品 ID</span>
+      }
+    </div>
+
+    <div class="pp-field">
+      <label class="pp-label">贈品數量</label>
+      <input type="number" class="form-control form-ctrl" [(ngModel)]="promoDraft.giftQuantity"
+        placeholder="-1 代表無限供應" />
+      <span class="pp-hint">-1 = 無限供應；正整數 = 限量</span>
+    </div>
+
+    <!-- 4. 日期範圍 -->
+    <div class="pp-section-divider">活動期間</div>
+
+    <div class="pp-field">
+      <label class="pp-label">
+        開始日期 <span class="required">*</span>
+      </label>
+      <input type="date" class="form-control form-ctrl pp-date" [(ngModel)]="promoDraft.startTime" [min]="today()" />
+    </div>
+
+    <div class="pp-field">
+      <label class="pp-label">
+        結束日期 <span class="required">*</span>
+      </label>
+      <input type="date" class="form-control form-ctrl pp-date" [(ngModel)]="promoDraft.endTime"
+        [disabled]="!promoDraft.startTime" [min]="promoDraft.startTime" />
+
+      @if (!promoDraft.startTime) {
+      <span class="pp-hint">請先選擇開始日期</span>
+      }
+    </div>
+
+    <!-- 5. 活動描述 + AI -->
+    <div class="pp-field">
+      <div style="
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+      ">
+        <label class="pp-label" style="margin: 0">活動描述 <span class="required">*</span></label>
+
+        <button class="btn btn-sm" type="button" style="
+          font-size: 0.75rem;
+          padding: 3px 10px;
+          background: linear-gradient(135deg, #c49756, #e8b86d);
+          color: #fff;
+          border: 0;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          white-space: nowrap;
+        " [disabled]="generatingPromoAiDesc() || !promoDraft.image" [title]="!promoDraft.image ? '請先上傳封面圖片' : ''"
+          (click)="generatePromoAiDesc()">
+          @if (generatingPromoAiDesc()) {
+          <span class="mgr-export-spinner" aria-hidden="true"></span>
+          生成中...
+          } @else {
+          ✨ AI 生成文案
+          }
+        </button>
+      </div>
+
+      <textarea class="form-control form-ctrl pp-textarea" [(ngModel)]="promoDraft.description" rows="3"
+        placeholder="可手動輸入活動描述，或上傳圖片後點擊「✨ AI 生成文案」"></textarea>
+    </div>
+  </div>
+  <!-- 底部操作列（固定） -->
+  <div class="promo-panel-ft">
+    <button class="btn btn-sm btn-cancel" (click)="closePromoPanel()">取消</button>
+    <button class="btn btn-sm btn-gold" (click)="savePromo()">
+      <span style="font-size: 0.85rem; font-weight: 700">✓</span> 儲存
+    </button>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Slide-in Panel：編輯活動資訊（文案 + 封面圖）
+      ════════════════════════════════════════════════════ -->
+@if (editPromoInfoId() !== null) {
+<div class="promo-panel-backdrop" (click)="closeEditPromoInfo()"></div>
+<div class="promo-panel">
+  <div class="promo-panel-hd">
+    <span class="promo-panel-title">✏️ 編輯活動資訊</span>
+    <button class="promo-panel-close" (click)="closeEditPromoInfo()">
+      ✕
+    </button>
+  </div>
+  <div class="promo-panel-body">
+    <!-- 封面圖片 -->
+    <div class="pp-field">
+      <label class="pp-label">封面圖片</label>
+      @if (editPromoInfoDraft.image) {
+      <div class="pp-img-preview">
+        <img [src]="editPromoInfoDraft.image" alt="封面預覽" />
+        <button class="pp-img-replace" (click)="editPromoFileInput.click()">
+          更換圖片
+        </button>
+      </div>
+      } @else {
+      <div class="pp-dropzone" (click)="editPromoFileInput.click()">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
+          stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="17 8 12 3 7 8" />
+          <line x1="12" y1="3" x2="12" y2="15" />
+        </svg>
+        <span class="pp-dropzone-label">拖曳圖片或點擊上傳</span>
+        <span class="pp-dropzone-hint">支援 JPG、PNG，建議 1200×675px</span>
+      </div>
+      }
+      <input type="file" accept="image/*" style="display: none" #editPromoFileInput
+        (change)="onEditPromoImageChange($event)" />
+    </div>
+    <!-- AI 文案 / 活動說明 -->
+    <!-- 活動名稱 -->
+    <div class="pp-field">
+      <label class="pp-label">活動名稱 <span class="required">*</span></label>
+      <input type="text" class="form-control form-ctrl" [(ngModel)]="editPromoInfoDraft.name"
+        placeholder="例：滿額優惠、夏季上新公告" />
+    </div>
+
+    <!-- 開始日期 -->
+    <div class="pp-field">
+      <label class="pp-label">開始日期 <span class="required">*</span></label>
+      <input type="date" class="form-control form-ctrl pp-date" [(ngModel)]="editPromoInfoDraft.startTime" />
+    </div>
+
+    <!-- 結束日期 -->
+    <div class="pp-field">
+      <label class="pp-label">結束日期 <span class="required">*</span></label>
+      <input type="date" class="form-control form-ctrl pp-date" [(ngModel)]="editPromoInfoDraft.endTime"
+        [min]="editPromoInfoDraft.startTime" />
+    </div>
+
+    <div class="pp-field">
+      <div style="
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              margin-bottom: 6px;
+            ">
+        <label class="pp-label" style="margin: 0">AI 文案 / 活動說明</label>
+        <button class="btn btn-sm" style="
+                font-size: 0.75rem;
+                padding: 3px 10px;
+                background: linear-gradient(135deg, #c49756, #e8b86d);
+                color: #fff;
+                border: none;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+              " [disabled]="generatingAiCopy()" (click)="generateAiCopy()">
+          @if (generatingAiCopy()) {
+          <span class="mgr-export-spinner" aria-hidden="true"></span>
+          生成中...
+          } @else {
+          ✨ 一鍵 AI 生成
+          }
+        </button>
+      </div>
+      <textarea class="form-control form-ctrl pp-textarea" [(ngModel)]="editPromoInfoDraft.description" rows="5"
+        placeholder="點擊「✨ 一鍵 AI 生成」自動產生文案，或手動輸入"></textarea>
+      <div style="font-size: 0.72rem; color: #8a9ab0; margin-top: 4px">
+        此文字將顯示在活動詳情的「AI 文案」區塊
+      </div>
+    </div>
+  </div>
+  <div class="promo-panel-ft">
+    <button class="btn btn-sm btn-cancel" (click)="closeEditPromoInfo()">取消</button>
+    <button class="btn btn-sm btn-gold" [disabled]="editPromoInfoSaving() || (editPromoInfoId() ?? 0) < 0"
+      [title]="(editPromoInfoId() ?? 0) < 0 ? 'Demo 活動無法儲存' : ''" (click)="saveEditPromoInfo()">
+      @if (editPromoInfoSaving()) {
+      <span class="mgr-export-spinner" aria-hidden="true"></span> 儲存中...
+      } @else {
+      <span style="font-size: 0.85rem; font-weight: 700">✓</span> 儲存
+      }
+    </button>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增贈品規則
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addGift") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">🎁 新增贈品規則</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="mb-3" style="font-size: 0.8rem; color: #8a9ab0">
+        活動：<span style="color: #c49756; font-weight: 600">{{
+          giftDraft.rawName
+          }}</span>
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">滿額門檻（元）<span class="required">*</span></label>
+        <input type="number" class="form-control form-ctrl" [(ngModel)]="giftDraft.fullAmount" min="1"
+          placeholder="例：300" />
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">贈品商品 <span class="required">*</span></label>
+        @if (giftProductList().length > 0) {
+        <select class="form-control form-ctrl" [(ngModel)]="giftDraft.giftProductId">
+          <option [value]="null">— 請選擇商品 —</option>
+          @for (p of giftProductList(); track p.id) {
+          <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+        } @else {
+        <div style="font-size: 0.8rem; color: #8a9ab0; padding: 6px 0">
+          載入商品清單中…
+        </div>
+        <input type="number" class="form-control form-ctrl" [(ngModel)]="giftDraft.giftProductId" min="1"
+          placeholder="輸入商品 ID" />
+        }
+      </div>
+      <div class="mb-2">
+        <label class="modal-label">贈品數量</label>
+        <input type="number" class="form-control form-ctrl" [(ngModel)]="giftDraft.quantity" placeholder="-1 代表無限供應" />
+        <div style="font-size: 0.73rem; color: #8a9ab0; margin-top: 4px">
+          -1 = 無限供應；輸入正整數 = 限量
+        </div>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      <button class="btn btn-sm btn-gold" (click)="saveGift()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 確認新增
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增 / 編輯帳號
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addAccount") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">
+        @if (editingAccountId() !== null) { ✏️ 編輯帳號 }
+        @else if (userSubTab() === 'bm') { 👤 新增分店長 }
+        @else if (userSubTab() === 'ma') { 👤 新增副店長 }
+        @else { 👤 新增員工 }
+      </div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      @if (newStaffResult()) {
+      <div class="new-staff-result">
+        <div class="nsr-icon">✅</div>
+        <div class="nsr-title">帳號新增成功</div>
+        <div class="nsr-row">
+          <span class="nsr-label">帳號</span>
+          <span class="nsr-value">{{ newStaffResult()!.account }}</span>
+        </div>
+        <div class="nsr-row">
+          <span class="nsr-label">預設密碼</span>
+          <span class="nsr-value">00000</span>
+        </div>
+        <p class="nsr-hint">
+          請將帳號告知員工，員工首次登入後系統會提示修改密碼。
+        </p>
+      </div>
+      } @else {
+      <div class="row g-2 mb-3">
+        <div class="col-12">
+          <label class="modal-label">姓名 <span class="required">*</span></label>
+          <input type="text" class="form-control form-ctrl" [(ngModel)]="accountDraft.name" placeholder="例：王小明" />
+        </div>
+      </div>
+      @if (editingAccountId() === null) {
+      <p class="mb-3" style="font-size: 0.78rem; color: #8a9ab0">
+        帳號與初始密碼由系統自動產生，員工首次登入時會提示修改密碼。
+      </p>
+      }
+      <div class="row g-2 mb-3">
+        <div class="col-4">
+          <label class="modal-label">國家</label>
+          <select class="form-select form-ctrl" [(ngModel)]="accountDraft.country"
+            (ngModelChange)="onAccountCountryChange($event)">
+            @for (c of uniqueCountries(); track c) {
+            <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-4">
+          <label class="modal-label">角色</label>
+          <select class="form-select form-ctrl" [(ngModel)]="accountDraft.role">
+            <option value="bm">分店長</option>
+            <option value="ma">副店長</option>
+            <option value="staff">員工</option>
+          </select>
+        </div>
+        <div class="col-4">
+          <label class="modal-label">所屬分店</label>
+          <select class="form-select form-ctrl" [(ngModel)]="accountDraft.branch">
+            @for (b of filteredAccountBranches(); track b.id) {
+            <option>{{ b.name }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      @if (editingAccountId() === null) {
+      <div class="mb-3" style="
+      border: 1px solid rgba(196,151,86,0.22);
+      background: rgba(196,151,86,0.08);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 0.78rem;
+      color: #4a5a70;
+    ">
+        <div style="font-weight: 700; color: #1a2840; margin-bottom: 6px">
+          {{ getRoleLabel(accountDraft.role) }}缺口提醒
+        </div>
+
+        @if (getMissingRoleBranchCount(accountDraft.role) === 0) {
+        <div style="color:#3b7c59">
+          目前所有分店都已經有{{ getRoleLabel(accountDraft.role) }}。
+        </div>
+        } @else {
+        <div style="margin-bottom: 6px">
+          目前還有
+          <strong>{{ getMissingRoleBranchCount(accountDraft.role) }}</strong>
+          間分店尚未配置{{ getRoleLabel(accountDraft.role) }}：
+        </div>
+
+        <div style="display:flex; flex-direction:column; gap:4px">
+          @for (group of getMissingRoleBranchGroups(accountDraft.role); track group.country) {
+          <div>
+            <span style="font-weight:700; color:#b08540">
+              {{ group.country }}
+            </span>
+            <span>
+              ：
+              @for (b of group.branches; track b.id) {
+              <span>{{ b.name }}</span>
+              @if (!$last) { <span>、</span> }
+              }
+            </span>
+          </div>
+          }
+        </div>
+        }
+      </div>
+      }
+      <div class="mb-1">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="modalAccActive" [(ngModel)]="accountDraft.isActive" />
+          <label class="form-check-label" for="modalAccActive" style="font-size: 0.82rem; color: #4a5a70">帳號啟用</label>
+        </div>
+      </div>
+      }
+      <!-- end @else -->
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      @if (newStaffResult()) {
+      <button class="btn btn-sm btn-gold" (click)="confirmNewStaff()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 完成
+      </button>
+      } @else {
+      <button class="btn btn-sm btn-gold" (click)="saveAccount()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 確認
+      </button>
+      }
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：調換分店
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "transferBranch") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">🔄 調換分店</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <p style="font-size:0.85rem; color:#4a5a70; margin-bottom:16px">
+        將
+        <strong style="color:#b08540; font-weight:800">
+          {{ transferTarget?.name }}
+        </strong>
+        <span style="color:#4a5a70">
+          （目前：{{ transferTarget?.branch ?? "—" }}）調至新分店：
+        </span>
+      </p>
+      <div class="mb-3">
+        <label class="modal-label">目標分店</label>
+        <select class="form-select form-ctrl" [ngModel]="transferNewAreaId()"
+          (ngModelChange)="transferNewAreaId.set($event)">
+          <option [ngValue]="null" disabled>請選擇分店</option>
+          @for (b of sortedBranches(); track b.id) {
+          <option [ngValue]="b.id">{{ b.country }}｜{{ b.name }}</option>
+          }
+        </select>
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      <button class="btn btn-sm btn-gold" (click)="confirmTransfer()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 確認調換
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增國家稅率
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addCountry") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box modal-tax" (click)="$event.stopPropagation()">
+    <!-- 標題列 -->
+    <div class="modal-hd">
+      <div class="modal-hd-title">新增國家／地區稅率</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-bd">
+      <!-- ── 上半區：稅率設定 ── -->
+      <div class="add-country-section-title">稅率設定</div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-7">
+          <label class="modal-label">國家／地區名稱 <span class="required">*</span></label>
+          <select class="form-select form-ctrl" [(ngModel)]="taxDraft.country"
+            (ngModelChange)="onCountrySelect($event)">
+            <option value="">請選擇國家／地區</option>
+            @if (availableCountryOptions().length === 0) {
+            <option value="" disabled>所有可選國家皆已新增</option>
+            }
+            @for (c of availableCountryOptions(); track c.code) {
+            <option [value]="c.name">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-5">
+          <label class="modal-label">國別代碼</label>
+          <input type="text" class="form-control form-ctrl mono" [value]="taxDraft.countryCode" readonly style="
+                  background: rgba(0, 0, 0, 0.03);
+                  letter-spacing: 2px;
+                  text-transform: uppercase;
+                " />
+          <div class="modal-helper-text">選擇國家後自動帶入</div>
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-7">
+          <label class="modal-label">稅率類型 <span class="required">*</span></label>
+          <select class="form-select form-ctrl" [(ngModel)]="taxDraft.taxType">
+            <option value="INCLUSIVE">內含稅（稅已含於售價中）</option>
+            <option value="EXCLUSIVE">外加稅（結帳時另行加收）</option>
+          </select>
+          <div class="modal-helper-text">
+            @if (taxDraft.taxType === "INCLUSIVE") {
+            顧客支付的金額已包含稅款
+            } @else {
+            系統將於結帳時在小計金額上加計稅率
+            }
+          </div>
+        </div>
+        <div class="col-5">
+          <label class="modal-label">幣別代碼</label>
+          <input type="text" class="form-control form-ctrl mono" [value]="taxDraft.currency" readonly style="
+                  background: rgba(0, 0, 0, 0.03);
+                  letter-spacing: 2px;
+                  text-transform: uppercase;
+                " />
+          <div class="modal-helper-text">選擇國家後自動帶入</div>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-5">
+          <label class="modal-label">稅率（%）<span class="required">*</span></label>
+          <div class="tax-input-wrap">
+            <input type="number" class="form-control form-ctrl mono tax-rate-input" [(ngModel)]="taxDraft.rate" min="0"
+              max="100" placeholder="0" />
+            <span class="tax-input-unit">%</span>
+          </div>
+          <div class="modal-helper-text">輸入 0 – 100 整數</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- 底部操作列 -->
+    <div class="modal-ft">
+      <button class="btn btn-ghost-navy" (click)="closeModal()">取消</button>
+      <button class="btn btn-gold" (click)="saveCountry()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 確認新增
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增會員優惠設定
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addMemberLimit") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">新增會員優惠設定</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+
+      <!-- 國家 -->
+      <div class="mb-3">
+        <label class="modal-label">國家／地區 <span class="required">*</span></label>
+        <select class="form-select form-ctrl" [ngModel]="addLimitRegionsId()"
+          (ngModelChange)="addLimitRegionsId.set($event)">
+          <option [ngValue]="0">請選擇國家／地區</option>
+          @if (availableMemberLimitCountries().length === 0) {
+          <option [ngValue]="0" disabled>目前全部國家皆已設定完成</option>
+          }
+
+          @for (t of availableMemberLimitCountries(); track t.id) {
+          <option [ngValue]="t.id">{{ t.country }}（{{ t.currency }}）</option>
+          }
+        </select>
+      </div>
+
+      @let selectedTax = addLimitSelectedTax();
+
+      <!-- 折扣上限 + 累積次數：並排兩欄 -->
+      <div class="row g-3 mb-2 align-items-start">
+        <div class="col-6">
+          <label class="modal-label">
+            折扣上限{{ selectedTax ? '（' + selectedTax.currency + '）' : '' }}
+          </label>
+
+          <div class="tax-input-wrap" style="max-width:100%">
+            <input type="number" class="form-control form-ctrl mono tax-rate-input" [ngModel]="addLimitAmount()"
+              (ngModelChange)="addLimitAmount.set(+$event)" min="0" placeholder="0" style="min-width:0; flex:1" />
+            <span class="tax-input-unit">{{ selectedTax?.currency || '—' }}</span>
+          </div>
+
+          <div class="modal-helper-text">
+            單次可折抵金額上限
+          </div>
+        </div>
+
+        <div class="col-6">
+          <label class="modal-label">折扣累積次數門檻</label>
+
+          <div class="tax-input-wrap" style="max-width:100%">
+            <input type="number" class="form-control form-ctrl mono tax-rate-input" [ngModel]="addLimitCount()"
+              (ngModelChange)="addLimitCount.set(+$event)" min="0" placeholder="0" style="min-width:0; flex:1" />
+            <span class="tax-input-unit">次</span>
+          </div>
+
+          <div class="modal-helper-text">
+            累積達此次數可折扣
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-ghost-navy" (click)="closeModal()">取消</button>
+      <button class="btn btn-gold" (click)="saveAddMemberLimit()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 儲存設定
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：新增分店
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "addBranch") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">新增分店</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="modal-label">國家 <span class="required">*</span></label>
+          <select class="form-select form-ctrl" [(ngModel)]="branchDraft.regionsId">
+            <option [ngValue]="0">請選擇</option>
+            @for (t of taxes(); track t.id) {
+            <option [ngValue]="t.id">{{ t.country }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="modal-label">所在分店名稱 <span class="required">*</span></label>
+          <input type="text" class="form-control form-ctrl" [(ngModel)]="branchDraft.branch"
+            [disabled]="!branchDraft.regionsId" placeholder="請輸入分店名稱" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">地址 <span class="required">*</span></label>
+        <input type="text" class="form-control form-ctrl" [(ngModel)]="branchDraft.address"
+          placeholder="例：首爾市江南區某路 1 號" />
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">電話 <span class="required">*</span></label>
+        <input type="text" class="form-control form-ctrl" [(ngModel)]="branchDraft.phone"
+          placeholder="例：+82-2-1234-5678" />
+      </div>
+      <div style="font-size: 0.76rem; color: #4a5a70">
+        新增後可在帳號管理中指派分店長與員工至此分店。
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      <button class="btn btn-sm btn-gold" (click)="saveBranch()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 確認新增
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ════════════════════════════════════════════════════
+      Modal：編輯分店
+      ════════════════════════════════════════════════════ -->
+@if (activeModal() === "editBranch") {
+<div class="modal-overlay" (click)="closeModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-hd">
+      <div class="modal-hd-title">編輯分店</div>
+      <button class="modal-close-btn" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-bd">
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="modal-label">國家 <span class="required">*</span></label>
+          <select class="form-select form-ctrl" [(ngModel)]="editBranchDraft.regionsId">
+            <option [ngValue]="0">請選擇</option>
+            @for (t of taxes(); track t.id) {
+            <option [ngValue]="t.id">{{ t.country }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="modal-label">所在分店名稱 <span class="required">*</span></label>
+          <input type="text" class="form-control form-ctrl" [(ngModel)]="editBranchDraft.branch"
+            placeholder="請輸入分店名稱名稱" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">地址 <span class="required">*</span></label>
+        <input type="text" class="form-control form-ctrl" [(ngModel)]="editBranchDraft.address"
+          placeholder="例：台北市中山區南京東路一段 88 號" />
+      </div>
+      <div class="mb-3">
+        <label class="modal-label">電話 <span class="required">*</span></label>
+        <input type="text" class="form-control form-ctrl" [(ngModel)]="editBranchDraft.phone"
+          placeholder="例：02-2345-6789" />
+      </div>
+    </div>
+    <div class="modal-ft">
+      <button class="btn btn-sm btn-cancel" (click)="closeModal()">取消</button>
+      <button class="btn btn-sm btn-gold" (click)="saveEditBranch()">
+        <span style="font-size: 0.85rem; font-weight: 700">✓</span> 儲存變更
+      </button>
+    </div>
+  </div>
+</div>
+}

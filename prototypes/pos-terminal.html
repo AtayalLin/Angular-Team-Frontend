@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OmniPOS | POS 點餐終端</title>
+
+    <!--
+     * ================================================================
+     * 檔案說明：pos-terminal.html
+     * 用途：分店長 / 員工 POS 點餐終端介面原型
+     * 功能：
+     *   - POS 點餐（分店長 + 員工共用）
+     *   - 訂單看板、庫存管理、活動管理、員工帳號（僅分店長可見）
+     *   - 今日報表（分店長可見，員工看基本版）
+     * 技術：Bootstrap 5.3.8 + 自訂深色主題 CSS + Vanilla JS
+     * 配色：
+     *   深色底  #0d1117   卡片底   #1c2130
+     *   金色    #c49756   分店長   #818cf8（靛藍）
+     *   員工    #4f8ef7   成功     #3ecf8e
+     * ================================================================
+    -->
+
+    <!-- Bootstrap 5.3.8 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+          crossorigin="anonymous">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        /* ================================================================
+         * 全站基礎重設 + 深色主題
+         * POS 介面為全螢幕佈局，避免頁面捲動
+         * ================================================================ */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #0d1117;
+            color: #e2e8f8;
+            font-family: 'Noto Sans TC', sans-serif;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            font-size: 0.875rem;
+        }
+
+        /* ================================================================
+         * 最頂層：角色選擇示範工具列（僅 Prototype 用，實際不存在）
+         * ================================================================ */
+        .demo-bar {
+            height: 36px;
+            background-color: #1a1f2e;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            padding: 0 16px;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .demo-bar-label { font-size: 0.7rem; color: #8892b0; }
+
+        .role-btn {
+            font-size: 0.7rem;
+            padding: 3px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 500;
+            border: 1px solid transparent;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .role-btn.active-bm {
+            background-color: rgba(129,140,248,0.2);
+            color: #818cf8;
+            border-color: rgba(129,140,248,0.35);
+        }
+        .role-btn.active-st {
+            background-color: rgba(79,142,247,0.2);
+            color: #4f8ef7;
+            border-color: rgba(79,142,247,0.35);
+        }
+        .role-btn.inactive {
+            background-color: rgba(255,255,255,0.05);
+            color: #8892b0;
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        /* ================================================================
+         * 系統頂部欄 (Top Bar)
+         * 顯示：分店名稱 / 班次 / 時間 / 角色標識 / 登出
+         * ================================================================ */
+        .pos-topbar {
+            height: 54px;
+            background-color: #111927;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            gap: 12px;
+            flex-shrink: 0;
+            z-index: 200;
+        }
+
+        .pos-brand { font-size: 1rem; font-weight: 700; color: #f0c68c; letter-spacing: 0.5px; }
+        .pos-branch { font-size: 0.8rem; color: #8892b0; }
+
+        .role-badge-bm { font-size: 0.7rem; font-family: 'IBM Plex Mono', monospace; color: #818cf8; background: rgba(129,140,248,0.12); border: 1px solid rgba(129,140,248,0.3); padding: 2px 10px; border-radius: 20px; }
+        .role-badge-st { font-size: 0.7rem; font-family: 'IBM Plex Mono', monospace; color: #4f8ef7; background: rgba(79,142,247,0.12); border: 1px solid rgba(79,142,247,0.3); padding: 2px 10px; border-radius: 20px; }
+
+        .pos-time { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #c9d1d9; }
+
+        /* ================================================================
+         * 分店長專屬頁籤列（員工時隱藏）
+         * 頁籤：POS點餐 / 訂單看板 / 庫存 / 活動 / 員工帳號 / 今日報表
+         * ================================================================ */
+        .pos-tabs {
+            background-color: #111927;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            padding: 0 16px;
+            gap: 2px;
+            flex-shrink: 0;
+        }
+
+        .pos-tab-btn {
+            padding: 9px 16px;
+            font-size: 0.8rem;
+            color: #8892b0;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: color 0.15s, border-color 0.15s;
+            white-space: nowrap;
+            user-select: none;
+        }
+
+        .pos-tab-btn:hover { color: #c9d1d9; }
+
+        /* 選中頁籤：靛藍底線（分店長識別色） */
+        .pos-tab-btn.active { color: #818cf8; border-bottom-color: #818cf8; font-weight: 500; }
+
+        /* 員工模式下的簡化頁籤（只有 POS + 庫存） */
+        .pos-tab-btn.staff-active { color: #4f8ef7; border-bottom-color: #4f8ef7; font-weight: 500; }
+
+        /* ================================================================
+         * 主 POS 區域（左：商品 / 右：購物車）
+         * ================================================================ */
+        .pos-main {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* 左側：商品瀏覽區域 (65% 寬) */
+        .pos-left {
+            flex: 0 0 65%;
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid rgba(255,255,255,0.07);
+            overflow: hidden;
+        }
+
+        /* 分類篩選列 */
+        .category-bar {
+            background-color: #111927;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 10px 16px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            flex-shrink: 0;
+            scrollbar-width: none;
+        }
+        .category-bar::-webkit-scrollbar { display: none; }
+
+        .cat-btn {
+            padding: 6px 16px;
+            font-size: 0.8rem;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 9999px;
+            color: #8892b0;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+        }
+        .cat-btn:hover { background-color: rgba(240,198,140,0.08); color: #c9d1d9; }
+        .cat-btn.active { background-color: #c49756; border-color: #c49756; color: #0d1117; font-weight: 600; }
+
+        /* 商品搜尋欄 */
+        .product-search {
+            padding: 10px 16px;
+            background-color: #111927;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+
+        .product-search input {
+            width: 100%;
+            background-color: #1c2130;
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: #e2e8f8;
+            padding: 7px 14px;
+            font-size: 0.85rem;
+            font-family: 'Noto Sans TC', sans-serif;
+            outline: none;
+        }
+        .product-search input::placeholder { color: #8892b0; }
+        .product-search input:focus { border-color: #c49756; box-shadow: 0 0 0 3px rgba(196,151,86,0.12); }
+
+        /* 商品網格區域（可捲動）*/
+        .product-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 16px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            align-content: start;
+        }
+        .product-grid::-webkit-scrollbar { width: 5px; }
+        .product-grid::-webkit-scrollbar-track { background: transparent; }
+        .product-grid::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        /* 商品卡片 */
+        .prod-card {
+            background-color: #1c2130;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+        }
+        .prod-card:hover { border-color: #c49756; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.35); }
+        .prod-card:active { transform: scale(0.97); }
+
+        /* 商品圖片區域（佔位色塊）*/
+        .prod-img {
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .prod-body { padding: 10px 12px; }
+        .prod-name { font-size: 0.85rem; font-weight: 600; color: #e2e8f8; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .prod-price { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #f0c68c; font-weight: 700; }
+        .prod-stock { font-size: 0.7rem; color: #8892b0; }
+        .prod-badge { font-size: 0.65rem; padding: 2px 7px; border-radius: 20px; font-weight: 600; display: inline-block; margin-bottom: 4px; }
+        .pb-hot { background-color: rgba(217,92,26,0.2); color: #f97316; }
+        .pb-new { background-color: rgba(240,165,0,0.2); color: #f0c68c; }
+        .pb-low { background-color: rgba(251,191,36,0.2); color: #fbbf24; }
+
+        /* ================================================================
+         * 右側：購物車 / 訂單確認面板 (35% 寬)
+         * ================================================================ */
+        .pos-right {
+            flex: 0 0 35%;
+            display: flex;
+            flex-direction: column;
+            background-color: #111927;
+        }
+
+        /* 訂單頂部：編號 + 清除 */
+        .cart-header {
+            padding: 14px 18px;
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .cart-title { font-size: 0.85rem; font-weight: 600; color: #e2e8f8; }
+        .cart-order-id { font-family: 'IBM Plex Mono', monospace; font-size: 0.75rem; color: #c49756; }
+
+        /* 購物車品項列表（可捲動） */
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 18px;
+        }
+        .cart-items::-webkit-scrollbar { width: 4px; }
+        .cart-items::-webkit-scrollbar-thumb { background-color: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        /* 購物車品項列 */
+        .cart-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .cart-row:last-child { border-bottom: none; }
+
+        .cart-item-name { flex: 1; font-size: 0.85rem; color: #e2e8f8; min-width: 0; }
+        .cart-item-eng  { display: block; font-size: 0.7rem; color: #8892b0; }
+
+        /* 數量控制 */
+        .qty-ctrl { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+        .qty-btn {
+            width: 24px; height: 24px;
+            border-radius: 6px;
+            background-color: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: #c9d1d9;
+            font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.12s;
+        }
+        .qty-btn:hover { background-color: rgba(196,151,86,0.2); color: #f0c68c; border-color: rgba(196,151,86,0.3); }
+        .qty-num { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #e2e8f8; min-width: 18px; text-align: center; }
+
+        .cart-item-price { font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; color: #f0c68c; font-weight: 700; min-width: 50px; text-align: right; flex-shrink: 0; }
+
+        .cart-empty { text-align: center; padding: 48px 0; color: #8892b0; }
+        .cart-empty-icon { font-size: 2.5rem; display: block; margin-bottom: 8px; opacity: 0.4; }
+
+        /* ================================================================
+         * 小計 / 稅 / 折扣 / 合計區域
+         * ================================================================ */
+        .cart-summary {
+            padding: 14px 18px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 7px;
+        }
+
+        .summary-label { font-size: 0.8rem; color: #8892b0; }
+        .summary-val   { font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; color: #c9d1d9; }
+
+        /* 合計列：較大字體、金色 */
+        .summary-total-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.09);
+            margin-top: 8px;
+        }
+
+        .summary-total-label { font-size: 0.9rem; font-weight: 600; color: #e2e8f8; }
+        .summary-total-val   { font-family: 'IBM Plex Mono', monospace; font-size: 1.3rem; font-weight: 700; color: #f0c68c; }
+
+        /* 滿額促銷提示列 */
+        .promo-hint {
+            background-color: rgba(196,151,86,0.08);
+            border: 1px solid rgba(196,151,86,0.2);
+            border-radius: 8px;
+            padding: 7px 12px;
+            font-size: 0.76rem;
+            color: #f0c68c;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+        /* ================================================================
+         * 付款區域
+         * ================================================================ */
+        .cart-payment {
+            padding: 12px 18px;
+            border-top: 1px solid rgba(255,255,255,0.07);
+            flex-shrink: 0;
+        }
+
+        .payment-label { font-size: 0.76rem; color: #8892b0; margin-bottom: 8px; }
+
+        .payment-methods { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+
+        .pay-btn {
+            flex: 1;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            text-align: center;
+            background-color: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: #8892b0;
+            transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+        }
+
+        .pay-btn:hover { background-color: rgba(255,255,255,0.09); color: #c9d1d9; }
+
+        /* 選中付款方式：金色邊框 + 淡金底 */
+        .pay-btn.active {
+            background-color: rgba(196,151,86,0.15);
+            color: #f0c68c;
+            border-color: rgba(196,151,86,0.4);
+            font-weight: 600;
+        }
+
+        /* 結帳大按鈕 */
+        .checkout-btn {
+            width: 100%;
+            padding: 13px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #c49756 0%, #f0c68c 100%);
+            color: #0d1117;
+            font-weight: 700;
+            font-size: 0.95rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.15s, transform 0.1s;
+        }
+        .checkout-btn:hover  { opacity: 0.92; }
+        .checkout-btn:active { transform: scale(0.98); }
+
+        /* ================================================================
+         * 分頁板塊（除 POS 外，全螢幕替換 pos-main）
+         * ================================================================ */
+        .page-panel {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: none;
+        }
+
+        .page-panel.active { display: block; }
+
+        /* 頁面板塊標題 */
+        .panel-title { font-size: 1.1rem; font-weight: 700; color: #f0c68c; margin-bottom: 4px; }
+        .panel-sub   { font-size: 0.78rem; color: #8892b0; margin-bottom: 20px; }
+
+        /* ================================================================
+         * 通用深色卡片 + 表格（同 manager-dashboard）
+         * ================================================================ */
+        .content-card {
+            background-color: #1c2130;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .table-wrapper { background-color: #161b22; border-radius: 8px; overflow: hidden; }
+
+        .tbl { color: #c9d1d9; font-size: 0.855rem; width: 100%; border-collapse: collapse; }
+        .tbl thead th { background-color: #0f1318; color: #8892b0; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.4px; padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; }
+        .tbl td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        .tbl tbody tr:hover td { background-color: rgba(255,255,255,0.02); }
+
+        /* 訂單看板卡片 */
+        .order-board-card {
+            background-color: #161b22;
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 10px;
+            padding: 14px;
+        }
+
+        .ob-num  { font-family: 'IBM Plex Mono', monospace; font-size: 1.2rem; font-weight: 700; color: #f0c68c; }
+        .ob-item { font-size: 0.8rem; color: #c9d1d9; padding: 2px 0; }
+
+        /* 狀態 badge */
+        .badge-ok   { background-color: rgba(62,207,142,0.15); color: #3ecf8e; border: 1px solid rgba(62,207,142,0.3); font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+        .badge-warn { background-color: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.3); font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+        .badge-err  { background-color: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+        .badge-blue { background-color: rgba(129,140,248,0.15); color: #818cf8; border: 1px solid rgba(129,140,248,0.3); font-size: 0.7rem; padding: 2px 9px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
+
+        .btn-ghost-gold { background-color: rgba(196,151,86,0.12); color: #c49756; border: 1px solid rgba(196,151,86,0.28); font-size: 0.75rem; }
+        .btn-ghost-gold:hover { background-color: rgba(196,151,86,0.22); color: #f0c68c; }
+        .btn-ghost-red  { background-color: rgba(248,113,113,0.10); color: #f87171; border: 1px solid rgba(248,113,113,0.25); font-size: 0.75rem; }
+        .btn-ghost-green { background-color: rgba(62,207,142,0.10); color: #3ecf8e; border: 1px solid rgba(62,207,142,0.25); font-size: 0.75rem; }
+
+        .mono { font-family: 'IBM Plex Mono', monospace; }
+
+        /* 報表數字卡 */
+        .stat-card { background-color: #1c2130; border: 1px solid rgba(255,255,255,0.07); border-radius: 12px; padding: 18px 20px; }
+        .stat-label { font-size: 0.75rem; color: #8892b0; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 7px; }
+        .stat-val   { font-family: 'IBM Plex Mono', monospace; font-size: 1.65rem; font-weight: 700; color: #f0c68c; }
+        .stat-sub   { font-size: 0.72rem; color: #8892b0; margin-top: 4px; }
+
+        /* 活動列 */
+        .promo-row {
+            background-color: #161b22;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-left: 4px solid #c49756;
+            border-radius: 0 10px 10px 0;
+            padding: 13px;
+            margin-bottom: 10px;
+        }
+
+        /* 庫存條 */
+        .stock-bar { height: 5px; background-color: #2d3748; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+        .fill-ok   { background-color: #3ecf8e; height: 100%; border-radius: 3px; }
+        .fill-warn { background-color: #fbbf24; height: 100%; border-radius: 3px; }
+        .fill-err  { background-color: #f87171; height: 100%; border-radius: 3px; }
+
+    </style>
+</head>
+<body>
+
+<!-- ================================================================
+     Prototype 示範用角色切換工具列
+     說明：模擬登入後的身份，切換分店長/員工視圖
+     實際系統此列不存在，由 Router 根據 JWT 角色決定
+     ================================================================ -->
+<div class="demo-bar">
+    <span class="demo-bar-label">🛠 Prototype 角色切換：</span>
+    <span class="role-btn active-bm" id="demoBM" onclick="setRole('bm')">分店長 Branch Manager</span>
+    <span class="role-btn inactive"  id="demoST" onclick="setRole('staff')">員工 Staff</span>
+    <span style="margin-left:auto;font-size:0.7rem;color:#8892b0;">此列僅供示範，正式版由系統路由決定</span>
+</div>
+
+
+<!-- ================================================================
+     POS 系統頂部欄
+     ================================================================ -->
+<div class="pos-topbar">
+    <div>
+        <span class="pos-brand">⚡ OmniPOS</span>
+        <span class="pos-branch ms-2">台灣台北店</span>
+    </div>
+    <span id="roleBadge" class="role-badge-bm">Branch Manager</span>
+    <span id="roleUser" style="font-size:0.82rem;color:#c9d1d9;">陳美玲</span>
+    <div class="ms-auto d-flex align-items-center gap-3">
+        <span class="pos-time" id="posTime">14:35</span>
+        <button class="btn btn-sm btn-ghost-red" style="font-size:0.75rem;">登出</button>
+    </div>
+</div>
+
+
+<!-- ================================================================
+     分店長頁籤列（員工時透過 JS 隱藏/簡化）
+     ================================================================ -->
+<div class="pos-tabs" id="posTabsBar">
+    <div class="pos-tab-btn active" id="tabPOS"      onclick="switchPosTab('pos',      this)">🖥️ POS 點餐</div>
+    <div class="pos-tab-btn"        id="tabBoard"    onclick="switchPosTab('board',    this)">📋 訂單看板</div>
+    <div class="pos-tab-btn"        id="tabStock"    onclick="switchPosTab('stock',    this)">📦 庫存管理</div>
+    <div class="pos-tab-btn"        id="tabPromo"    onclick="switchPosTab('promo',    this)">🎯 活動管理</div>
+    <div class="pos-tab-btn bm-only" id="tabStaff"   onclick="switchPosTab('staff',   this)">👤 員工帳號</div>
+    <div class="pos-tab-btn"        id="tabReport"   onclick="switchPosTab('report',  this)">📊 今日報表</div>
+</div>
+
+
+<!-- ================================================================
+     主 POS 點餐介面（左：商品 / 右：購物車）
+     ================================================================ -->
+<div id="panelPOS" class="pos-main">
+
+    <!-- ── 左側：商品瀏覽 ── -->
+    <div class="pos-left">
+
+        <!-- 分類篩選 -->
+        <div class="category-bar">
+            <span class="cat-btn active" onclick="filterCat(this)">全部</span>
+            <span class="cat-btn" onclick="filterCat(this)">🍜 台式</span>
+            <span class="cat-btn" onclick="filterCat(this)">🍛 南洋</span>
+            <span class="cat-btn" onclick="filterCat(this)">🍝 西式</span>
+            <span class="cat-btn" onclick="filterCat(this)">🥗 輕食</span>
+            <span class="cat-btn" onclick="filterCat(this)">🧋 飲品</span>
+        </div>
+
+        <!-- 搜尋列 -->
+        <div class="product-search">
+            <input type="text" placeholder="🔍  搜尋餐點名稱…">
+        </div>
+
+        <!-- 商品網格 -->
+        <div class="product-grid">
+
+            <!-- 商品卡 1 -->
+            <div class="prod-card" onclick="addToCart(1,'紅燒牛肉麵','Braised Beef Noodle',165)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#2d1a0e,#5c3520);">🍜</div>
+                <div class="prod-body">
+                    <span class="prod-badge pb-hot">熱銷</span>
+                    <div class="prod-name">紅燒牛肉麵</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$165</span>
+                        <span class="prod-stock">庫存 48</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 2 -->
+            <div class="prod-card" onclick="addToCart(2,'印度奶油咖哩飯','Butter Chicken Curry',175)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#2d1f0a,#5c4010);">🍛</div>
+                <div class="prod-body">
+                    <span class="prod-badge pb-new">新品</span>
+                    <div class="prod-name">印度奶油咖哩</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$175</span>
+                        <span class="prod-stock">庫存 32</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 3 -->
+            <div class="prod-card" onclick="addToCart(3,'越南牛肉河粉','Pho Bo',155)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#0a2d1a,#106030);">🍲</div>
+                <div class="prod-body">
+                    <span class="prod-badge pb-low">低庫存</span>
+                    <div class="prod-name">越南牛肉河粉</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$155</span>
+                        <span class="prod-stock" style="color:#fbbf24;">庫存 5</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 4 -->
+            <div class="prod-card" onclick="addToCart(4,'三杯雞飯','Three-Cup Chicken',150)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#1e1a2d,#3d3060);">🍗</div>
+                <div class="prod-body">
+                    <div class="prod-name">三杯雞飯</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$150</span>
+                        <span class="prod-stock">庫存 24</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 5 -->
+            <div class="prod-card" onclick="addToCart(5,'墨西哥辣雞捲','Spicy Chicken Wrap',145)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#2d0a0a,#6b1a1a);">🌮</div>
+                <div class="prod-body">
+                    <span class="prod-badge pb-hot">熱銷</span>
+                    <div class="prod-name">墨西哥辣雞捲</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$145</span>
+                        <span class="prod-stock">庫存 18</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 6 -->
+            <div class="prod-card" onclick="addToCart(6,'凱薩沙拉','Caesar Salad',120)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#0a2d12,#1a5c28);">🥗</div>
+                <div class="prod-body">
+                    <div class="prod-name">凱薩沙拉</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$120</span>
+                        <span class="prod-stock">庫存 15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 7 -->
+            <div class="prod-card" onclick="addToCart(7,'珍珠奶茶','Bubble Tea',65)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#0a1e2d,#154060);">🧋</div>
+                <div class="prod-body">
+                    <span class="prod-badge pb-hot">熱銷</span>
+                    <div class="prod-name">珍珠奶茶</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$65</span>
+                        <span class="prod-stock">庫存 120</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 8 -->
+            <div class="prod-card" onclick="addToCart(8,'招牌滷蛋','Marinated Egg',30)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#1e1208,#4a2e10);">🥚</div>
+                <div class="prod-body">
+                    <div class="prod-name">招牌滷蛋</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$30</span>
+                        <span class="prod-stock">庫存 80</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品卡 9 -->
+            <div class="prod-card" onclick="addToCart(9,'味噌湯','Miso Soup',45)">
+                <div class="prod-img" style="background:linear-gradient(135deg,#1a1200,#3d2c00);">🍵</div>
+                <div class="prod-body">
+                    <div class="prod-name">味噌湯</div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="prod-price">$45</span>
+                        <span class="prod-stock">庫存 60</span>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.product-grid -->
+    </div><!-- /.pos-left -->
+
+
+    <!-- ── 右側：購物車 / 結帳面板 ── -->
+    <div class="pos-right">
+
+        <!-- 訂單頭部 -->
+        <div class="cart-header">
+            <div>
+                <div class="cart-title">目前訂單</div>
+                <div class="cart-order-id">#TW-2061</div>
+            </div>
+            <button class="btn btn-sm btn-ghost-red" onclick="clearCart()" style="font-size:0.75rem;">清空</button>
+        </div>
+
+        <!-- 品項列表 -->
+        <div class="cart-items" id="cartItems">
+            <!-- 空購物車提示 -->
+            <div class="cart-empty" id="cartEmpty">
+                <span class="cart-empty-icon">🛒</span>
+                <div style="font-size:0.82rem;">點擊左側商品加入訂單</div>
+            </div>
+        </div>
+
+        <!-- 小計區域 -->
+        <div class="cart-summary">
+            <div class="summary-row"><span class="summary-label">小計</span><span class="summary-val mono" id="subtotalVal">$0</span></div>
+            <div class="summary-row"><span class="summary-label">營業稅 (5%)</span><span class="summary-val mono" id="taxVal">$0</span></div>
+            <div class="summary-row"><span class="summary-label">折扣</span><span class="summary-val mono" style="color:#3ecf8e;" id="discountVal">-$0</span></div>
+
+            <div class="summary-total-row">
+                <span class="summary-total-label">合計</span>
+                <span class="summary-total-val" id="totalVal">$0</span>
+            </div>
+
+            <!-- 滿額提示（購物車有商品時顯示） -->
+            <div class="promo-hint" id="promoHint" style="display:none;">
+                🎁 再加 <strong id="promoRemain">$300</strong> 即可獲得 招牌滷蛋×2 免費贈品！
+            </div>
+        </div>
+
+        <!-- 付款方式 + 結帳 -->
+        <div class="cart-payment">
+            <div class="payment-label">選擇付款方式</div>
+            <div class="payment-methods">
+                <div class="pay-btn active"   onclick="selectPay(this)">💵 現金</div>
+                <div class="pay-btn"          onclick="selectPay(this)">💳 信用卡</div>
+                <div class="pay-btn"          onclick="selectPay(this)">📱 行動支付</div>
+            </div>
+            <button class="checkout-btn" onclick="checkout()">結帳 ✓</button>
+        </div>
+
+    </div><!-- /.pos-right -->
+</div><!-- /#panelPOS -->
+
+
+<!-- ================================================================
+     頁面板塊：訂單看板（分店長可見）
+     ================================================================ -->
+<div id="panelBoard" class="page-panel">
+    <div class="panel-title">訂單看板</div>
+    <div class="panel-sub">即時廚房出餐進度，可標記製作完成</div>
+
+    <div class="row g-3">
+        <!-- 待製作 -->
+        <div class="col-md-4">
+            <div style="font-size:0.82rem;font-weight:600;color:#fbbf24;margin-bottom:10px;">⏳ 待製作 (2)</div>
+            <div class="order-board-card mb-2">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="ob-num">A-048</span>
+                    <span class="badge-warn">等待中</span>
+                </div>
+                <div class="ob-item">紅燒牛肉麵 × 1</div>
+                <div class="ob-item">珍珠奶茶 × 2</div>
+                <button class="btn btn-sm btn-ghost-gold mt-2" style="width:100%;">開始製作</button>
+            </div>
+            <div class="order-board-card">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="ob-num">A-049</span>
+                    <span class="badge-warn">等待中</span>
+                </div>
+                <div class="ob-item">越南河粉 × 1</div>
+                <div class="ob-item">滷蛋 × 2</div>
+                <button class="btn btn-sm btn-ghost-gold mt-2" style="width:100%;">開始製作</button>
+            </div>
+        </div>
+
+        <!-- 製作中 -->
+        <div class="col-md-4">
+            <div style="font-size:0.82rem;font-weight:600;color:#818cf8;margin-bottom:10px;">🔥 製作中 (1)</div>
+            <div class="order-board-card" style="border:1px solid rgba(129,140,248,0.25);">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="ob-num">A-047</span>
+                    <span class="badge-blue">製作中</span>
+                </div>
+                <div class="ob-item">印度咖哩飯 × 2</div>
+                <div class="ob-item">饢餅 × 1</div>
+                <div class="ob-item" style="color:#8892b0;font-size:0.72rem;margin-top:4px;">預估 8 分鐘</div>
+                <button class="btn btn-sm btn-ghost-green mt-2" style="width:100%;">完成出餐</button>
+            </div>
+        </div>
+
+        <!-- 已完成 -->
+        <div class="col-md-4">
+            <div style="font-size:0.82rem;font-weight:600;color:#3ecf8e;margin-bottom:10px;">✅ 已完成 (3)</div>
+            <div class="order-board-card mb-2" style="opacity:0.6;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="ob-num">A-046</span><span class="badge-ok">已取餐</span>
+                </div>
+                <div class="ob-item">三杯雞飯 × 1、味噌湯 × 1</div>
+            </div>
+            <div class="order-board-card" style="opacity:0.6;">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <span class="ob-num">A-045</span><span class="badge-ok">已取餐</span>
+                </div>
+                <div class="ob-item">凱薩沙拉 × 2、奶茶 × 1</div>
+            </div>
+        </div>
+    </div>
+</div><!-- /#panelBoard -->
+
+
+<!-- ================================================================
+     頁面板塊：庫存管理（分店長 + 員工可見；員工僅可查看）
+     ================================================================ -->
+<div id="panelStock" class="page-panel">
+    <div class="panel-title">庫存管理</div>
+    <div class="panel-sub" id="stockSub">查看並調整本分店商品庫存量</div>
+
+    <div class="content-card">
+        <div class="table-wrapper">
+            <table class="tbl">
+                <thead><tr><th>商品名稱</th><th>庫存量</th><th>安全庫存</th><th>狀態</th><th id="stockActionCol">操作</th></tr></thead>
+                <tbody>
+                    <tr><td>紅燒牛肉麵</td><td class="mono">48</td><td class="mono" style="color:#8892b0;">10</td><td><span class="badge-ok">充足</span></td>  <td id="sa1"><button class="btn btn-sm btn-ghost-gold">調整</button></td></tr>
+                    <tr><td>越南牛肉河粉</td><td class="mono" style="color:#fbbf24;">5</td><td class="mono" style="color:#8892b0;">10</td><td><span class="badge-warn">偏低</span></td><td id="sa2"><button class="btn btn-sm btn-ghost-gold">調整</button></td></tr>
+                    <tr><td>珍珠奶茶</td><td class="mono">120</td><td class="mono" style="color:#8892b0;">30</td><td><span class="badge-ok">充足</span></td>  <td id="sa3"><button class="btn btn-sm btn-ghost-gold">調整</button></td></tr>
+                    <tr><td>招牌滷蛋</td><td class="mono">80</td><td class="mono" style="color:#8892b0;">20</td><td><span class="badge-ok">充足</span></td>   <td id="sa4"><button class="btn btn-sm btn-ghost-gold">調整</button></td></tr>
+                    <tr><td>墨西哥辣雞捲</td><td class="mono" style="color:#f87171;">2</td><td class="mono" style="color:#8892b0;">10</td><td><span class="badge-err">缺貨</span></td> <td id="sa5"><button class="btn btn-sm btn-ghost-gold">調整</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div><!-- /#panelStock -->
+
+
+<!-- ================================================================
+     頁面板塊：活動管理（分店長可見）
+     ================================================================ -->
+<div id="panelPromo" class="page-panel">
+    <div class="panel-title">活動管理</div>
+    <div class="panel-sub">本分店目前套用的促銷活動（老闆可另設定全店活動）</div>
+
+    <div class="promo-row">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div style="font-size:0.9rem;font-weight:600;color:#e2e8f8;">🎁 滿 $300 贈招牌滷蛋×2</div>
+                <div style="font-size:0.75rem;color:#8892b0;margin-top:3px;">由老闆設定 · 全部分店 · 無限期</div>
+            </div>
+            <span class="badge-ok">進行中</span>
+        </div>
+    </div>
+
+    <div class="promo-row" style="border-left-color:#4f8ef7;">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <div style="font-size:0.9rem;font-weight:600;color:#e2e8f8;">🛍 本月新品嚐鮮 95 折</div>
+                <div style="font-size:0.75rem;color:#8892b0;margin-top:3px;">本分店自設 · 期限：2026-04-30</div>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+                <span class="badge-ok">進行中</span>
+                <div class="form-check form-switch mb-0"><input class="form-check-input" type="checkbox" checked></div>
+            </div>
+        </div>
+    </div>
+</div><!-- /#panelPromo -->
+
+
+<!-- ================================================================
+     頁面板塊：員工帳號（僅分店長可見）
+     ================================================================ -->
+<div id="panelStaff" class="page-panel">
+    <div class="panel-title">員工帳號管理</div>
+    <div class="panel-sub">管理本分店員工帳號，可新增或停權</div>
+
+    <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-sm" style="background-color:#c49756;border-color:#c49756;color:#0d1117;font-weight:600;font-size:0.8rem;">+ 新增員工帳號</button>
+    </div>
+
+    <div class="content-card">
+        <div class="table-wrapper">
+            <table class="tbl">
+                <thead><tr><th>姓名</th><th>帳號</th><th>班別</th><th>上次登入</th><th>狀態</th><th>操作</th></tr></thead>
+                <tbody>
+                    <tr><td>王小明</td><td class="mono" style="color:#8892b0;">wang.xm</td><td>早班</td><td style="color:#8892b0;">今日 09:00</td><td><span class="badge-ok">啟用</span></td>
+                        <td class="d-flex gap-1"><button class="btn btn-sm btn-ghost-gold">編輯</button><button class="btn btn-sm btn-ghost-red">停權</button></td></tr>
+                    <tr><td>李佳靜</td><td class="mono" style="color:#8892b0;">lee.jj</td><td>晚班</td><td style="color:#8892b0;">昨日 17:00</td><td><span class="badge-ok">啟用</span></td>
+                        <td class="d-flex gap-1"><button class="btn btn-sm btn-ghost-gold">編輯</button><button class="btn btn-sm btn-ghost-red">停權</button></td></tr>
+                    <tr><td>張偉成</td><td class="mono" style="color:#8892b0;">chang.wc</td><td>假日班</td><td style="color:#8892b0;">3天前</td><td><span class="badge-err">停權</span></td>
+                        <td class="d-flex gap-1"><button class="btn btn-sm btn-ghost-gold">編輯</button><button class="btn btn-sm btn-ghost-green">復權</button></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div><!-- /#panelStaff -->
+
+
+<!-- ================================================================
+     頁面板塊：今日報表
+     ================================================================ -->
+<div id="panelReport" class="page-panel">
+    <div class="panel-title">今日報表</div>
+    <div class="panel-sub">本分店今日班次數據彙整</div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-label">今日營收</div>
+                <div class="stat-val">$14,230</div>
+                <div class="stat-sub">↑ 8.2% 較昨日</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-label">今日訂單數</div>
+                <div class="stat-val">89</div>
+                <div class="stat-sub">平均客單 $159</div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+            <div class="stat-card">
+                <div class="stat-label">贈品核發</div>
+                <div class="stat-val">4 份</div>
+                <div class="stat-sub">招牌滷蛋×2 共 8 顆</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-card">
+        <div style="font-size:0.9rem;font-weight:600;color:#e2e8f8;margin-bottom:14px;">熱銷品項排行</div>
+        <div class="table-wrapper">
+            <table class="tbl">
+                <thead><tr><th>#</th><th>品項</th><th>銷售數量</th><th>佔比</th></tr></thead>
+                <tbody>
+                    <tr><td class="mono" style="color:#f0c68c;">1</td><td>紅燒牛肉麵</td><td class="mono">28</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:5px;background:#2d3748;border-radius:3px;overflow:hidden;"><div style="width:90%;height:100%;background:#c49756;border-radius:3px;"></div></div><span class="mono" style="font-size:0.72rem;color:#8892b0;">31%</span></div></td></tr>
+                    <tr><td class="mono" style="color:#f0c68c;">2</td><td>珍珠奶茶</td><td class="mono">22</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:5px;background:#2d3748;border-radius:3px;overflow:hidden;"><div style="width:70%;height:100%;background:#4f8ef7;border-radius:3px;"></div></div><span class="mono" style="font-size:0.72rem;color:#8892b0;">25%</span></div></td></tr>
+                    <tr><td class="mono" style="color:#f0c68c;">3</td><td>印度咖哩飯</td><td class="mono">18</td><td><div style="display:flex;align-items:center;gap:8px;"><div style="flex:1;height:5px;background:#2d3748;border-radius:3px;overflow:hidden;"><div style="width:57%;height:100%;background:#3ecf8e;border-radius:3px;"></div></div><span class="mono" style="font-size:0.72rem;color:#8892b0;">20%</span></div></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div><!-- /#panelReport -->
+
+
+<!-- Bootstrap 5.3.8 JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<script>
+    /*
+     * ================================================================
+     * 全域狀態：目前角色 + 購物車資料
+     * ================================================================
+     */
+    let currentRole = 'bm';   /* 'bm' = 分店長 | 'staff' = 員工 */
+    let cart = [];             /* 購物車陣列：[{id, name, eng, price, qty}] */
+    let selectedPayMethod = 0; /* 選中付款方式的 DOM index */
+
+    /* ================================================================
+     * 即時時鐘
+     * ================================================================ */
+    function updateClock() {
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        document.getElementById('posTime').textContent = h + ':' + m + ':' + s;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    /* ================================================================
+     * 角色切換（示範用）
+     * 切換時：更新頂部徽章、頁籤列、庫存操作欄可見性
+     * ================================================================ */
+    function setRole(role) {
+        currentRole = role;
+        const isBM = (role === 'bm');
+
+        /* 更新 demo 工具列按鈕樣式 */
+        document.getElementById('demoBM').className = 'role-btn ' + (isBM ? 'active-bm' : 'inactive');
+        document.getElementById('demoST').className = 'role-btn ' + (isBM ? 'inactive' : 'active-st');
+
+        /* 更新頂部角色徽章 + 使用者名稱 */
+        const badge = document.getElementById('roleBadge');
+        const user  = document.getElementById('roleUser');
+        if (isBM) {
+            badge.className = 'role-badge-bm';
+            badge.textContent = 'Branch Manager';
+            user.textContent = '陳美玲';
+        } else {
+            badge.className = 'role-badge-st';
+            badge.textContent = 'Staff';
+            user.textContent = '王小明';
+        }
+
+        /* 控制員工專屬頁籤（員工帳號）的可見性 */
+        document.querySelectorAll('.bm-only').forEach(el => {
+            el.style.display = isBM ? '' : 'none';
+        });
+
+        /* 員工庫存頁只能查看，不顯示操作按鈕 */
+        const actionCells = ['sa1','sa2','sa3','sa4','sa5'];
+        actionCells.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.style.visibility = isBM ? 'visible' : 'hidden';
+        });
+
+        /* 切換回 POS 主畫面 */
+        switchPosTab('pos', document.getElementById('tabPOS'));
+    }
+
+    /* ================================================================
+     * POS 頁籤切換
+     * 隱藏 pos-main + 所有 page-panel，然後顯示指定面板
+     * ================================================================
+     */
+    function switchPosTab(tabId, el) {
+        /* 清除所有頁籤 active */
+        document.querySelectorAll('.pos-tab-btn').forEach(b => b.classList.remove('active', 'staff-active'));
+        /* 隱藏主 POS 畫面 */
+        document.getElementById('panelPOS').style.display = 'none';
+        /* 隱藏所有 page-panel */
+        document.querySelectorAll('.page-panel').forEach(p => { p.style.display = 'none'; p.classList.remove('active'); });
+
+        if (tabId === 'pos') {
+            document.getElementById('panelPOS').style.display = 'flex';
+            el.classList.add(currentRole === 'bm' ? 'active' : 'staff-active');
+        } else {
+            const panelMap = { board:'panelBoard', stock:'panelStock', promo:'panelPromo', staff:'panelStaff', report:'panelReport' };
+            const panel = document.getElementById(panelMap[tabId]);
+            if (panel) { panel.style.display = 'block'; panel.classList.add('active'); }
+            el.classList.add(currentRole === 'bm' ? 'active' : 'staff-active');
+        }
+    }
+
+    /* ================================================================
+     * 分類篩選（前端示範：僅切換按鈕樣式）
+     * ================================================================ */
+    function filterCat(el) {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    /* ================================================================
+     * 付款方式選擇
+     * ================================================================ */
+    function selectPay(el) {
+        document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+    }
+
+    /* ================================================================
+     * 加入購物車
+     * 若品項已存在則 qty+1，否則新增
+     * ================================================================ */
+    function addToCart(id, name, eng, price) {
+        const existing = cart.find(c => c.id === id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({ id, name, eng, price, qty: 1 });
+        }
+        renderCart();
+        /* 手機震動反饋 */
+        if (navigator.vibrate) navigator.vibrate(25);
+    }
+
+    /* ================================================================
+     * 更新購物車數量
+     * delta: +1 或 -1；qty <= 0 時從購物車移除
+     * ================================================================ */
+    function updateQty(id, delta) {
+        const item = cart.find(c => c.id === id);
+        if (!item) return;
+        item.qty += delta;
+        if (item.qty <= 0) cart = cart.filter(c => c.id !== id);
+        renderCart();
+    }
+
+    /* ================================================================
+     * 清空購物車
+     * ================================================================ */
+    function clearCart() {
+        cart = [];
+        renderCart();
+    }
+
+    /* ================================================================
+     * 渲染購物車畫面
+     * 計算小計、稅金（5%）、合計，更新 DOM
+     * ================================================================ */
+    function renderCart() {
+        const container = document.getElementById('cartItems');
+        const emptyMsg  = document.getElementById('cartEmpty');
+        const subtotalEl = document.getElementById('subtotalVal');
+        const taxEl      = document.getElementById('taxVal');
+        const discountEl = document.getElementById('discountVal');
+        const totalEl    = document.getElementById('totalVal');
+        const promoHint  = document.getElementById('promoHint');
+        const promoRemain = document.getElementById('promoRemain');
+
+        if (cart.length === 0) {
+            /* 空購物車：只顯示提示訊息 */
+            emptyMsg.style.display = 'block';
+            /* 清除舊的品項 DOM */
+            Array.from(container.children).forEach(c => { if (c !== emptyMsg) c.remove(); });
+            subtotalEl.textContent = '$0';
+            taxEl.textContent      = '$0';
+            discountEl.textContent = '-$0';
+            totalEl.textContent    = '$0';
+            promoHint.style.display = 'none';
+            return;
+        }
+
+        emptyMsg.style.display = 'none';
+        /* 清除舊的品項 DOM */
+        Array.from(container.children).forEach(c => { if (c !== emptyMsg) c.remove(); });
+
+        /* 重新渲染品項 */
+        let subtotal = 0;
+        cart.forEach(item => {
+            subtotal += item.price * item.qty;
+            const row = document.createElement('div');
+            row.className = 'cart-row';
+            row.innerHTML =
+                '<div class="cart-item-name">' + item.name + '<span class="cart-item-eng">' + item.eng + '</span></div>' +
+                '<div class="qty-ctrl">' +
+                  '<div class="qty-btn" onclick="updateQty(' + item.id + ',-1)">−</div>' +
+                  '<span class="qty-num">' + item.qty + '</span>' +
+                  '<div class="qty-btn" onclick="updateQty(' + item.id + ',1)">+</div>' +
+                '</div>' +
+                '<div class="cart-item-price">$' + (item.price * item.qty) + '</div>';
+            container.appendChild(row);
+        });
+
+        /* 計算稅金（5%）與合計 */
+        const tax   = Math.round(subtotal * 0.05);
+        const total = subtotal + tax;
+
+        subtotalEl.textContent = '$' + subtotal;
+        taxEl.textContent      = '$' + tax;
+        discountEl.textContent = '-$0';
+        totalEl.textContent    = '$' + total;
+
+        /* 滿額促銷提示（未達 300 時顯示） */
+        if (subtotal > 0 && subtotal < 300) {
+            promoHint.style.display = 'block';
+            promoRemain.textContent = '$' + (300 - subtotal);
+        } else {
+            promoHint.style.display = 'none';
+        }
+    }
+
+    /* ================================================================
+     * 結帳（示範：清空購物車 + 顯示完成訊息）
+     * ================================================================ */
+    function checkout() {
+        if (cart.length === 0) { alert('購物車是空的！'); return; }
+        alert('✅ 結帳成功！訂單 #TW-2061 已送出廚房。');
+        clearCart();
+    }
+
+    /* ================================================================
+     * 初始化：預設為分店長角色
+     * ================================================================ */
+    setRole('bm');
+</script>
+</body>
+</html>

@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GlobalMeals</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+  <!-- =====================================================
+    dotlottie-wc：LottieFiles 官方 Web Component 播放器
+    用來播放 .lottie 壓縮格式的動畫（比 .json 更小更快）
+    type="module" 讓瀏覽器以 ES Module 方式載入
+  ===================================================== -->
+  <script src="https://unpkg.com/@lottiefiles/dotlottie-wc@0.9.3/dist/dotlottie-wc.js" type="module"></script>
+
+  <!-- =====================================================
+    Bootstrap 5.3.8：提供 .row / .col / .btn / .table 等通用類別
+    僅 manager-dashboard 與 pos-terminal 需要，引入到全域讓兩個頁面都能使用
+  ===================================================== -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+        rel="stylesheet"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
+        crossorigin="anonymous">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
+          crossorigin="anonymous" defer></script>
+
+  <!-- =====================================================
+    字體引入：Google Fonts
+    Fraunces     - 有機曲線的英文展示字體，適合品牌名稱與標題
+    LXGW WenKai TC - 台灣楷書風格，溫暖有人情味的中文字體
+    DM Mono      - 等寬字體（於 CSS 中直接引用，無需在此另外載入）
+    preconnect   - 提前建立連線，加快字體載入速度
+  ===================================================== -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;0,9..144,900;1,9..144,400&family=LXGW+WenKai+TC&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Noto Sans TC + IBM Plex Mono：管理後台 / POS 系統用 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- Noto Sans JP / KR：日文・韓文語系切換用 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

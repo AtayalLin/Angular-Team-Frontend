@@ -1,0 +1,80 @@
+/*
+ * =====================================================
+ * 檔案名稱：staff-loading.component.scss
+ * 位置說明：src/app/shared/staff-loading/staff-loading.component.scss
+ * 用途說明：管理系統 Loading 遮罩的樣式
+ * 設計說明：
+ *   深海軍藍 #1E3A5F 半透明遮罩
+ *   金黃色 #F0A500 標題文字與圓環
+ *   z-index: 9999 確保遮罩蓋在所有頁面元素上方
+ * =====================================================
+ */
+
+
+/* ── 全螢幕遮罩 ──────────────────────────────────────
+   position: fixed  固定在視窗上，不隨頁面捲動
+   top/left: 0      從左上角開始
+   width/height 100%蓋滿整個視窗
+   z-index: 9999    最高層，覆蓋所有元素
+───────────────────────────────────────────────────── */
+.staff-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(30, 58, 95, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+
+/* ── 中央浮動卡片 ─────────────────────────────────────
+   flex-direction: column  子元素垂直排列（圓環、文字由上到下）
+   backdrop-filter: blur   毛玻璃效果，讓背景有模糊感
+───────────────────────────────────────────────────── */
+.staff-loading-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 48px 60px;
+  background-color: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(240, 165, 0, 0.30);
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+}
+
+
+/* ── 文字群組：標題 + 副標題垂直排列 ─────────────────── */
+.staff-loading-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+
+/* ── 主標題文字 ───────────────────────────────────────
+   金黃色 #F0A500，letter-spacing 加寬，呈現儀式感
+───────────────────────────────────────────────────── */
+.staff-loading-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F0A500;
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 3px;
+}
+
+
+/* ── 副標題文字 ───────────────────────────────────────
+   淡灰藍色，字體較小，補充說明用
+───────────────────────────────────────────────────── */
+.staff-loading-sub {
+  font-size: 13px;
+  color: rgba(212, 220, 232, 0.75);
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 1px;
+}

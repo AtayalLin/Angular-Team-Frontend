@@ -1,0 +1,208 @@
+<nav class="mode-nav">
+  <a class="nav-staff" [routerLink]="['/staff-login']">⚙ {{ lang.managementSystem }}</a>
+  <a class="nav-customer" [routerLink]="['/customer-login']">🍜 {{ lang.customerEntrance }}</a>
+</nav>
+
+<!-- 國家 / 語系切換列 -->
+<div class="c-country-switch">
+  @for (c of allCountries; track c.code) {
+    <button
+      class="c-country-btn"
+      [class.is-active]="activeCountry === c.code"
+      (click)="selectCountry(c.code)"
+    >
+      <span class="c-flag-dot" [class]="'c-flag-' + c.code.toLowerCase()"></span>
+      {{ c.nameLocal }}
+    </button>
+  }
+</div>
+
+<div class="shell">
+  <div class="panel" id="register-panel">
+
+    <aside class="c-left">
+      <div class="c-blob1"></div>
+      <div class="c-blob2"></div>
+      <div class="c-floats">
+        <span class="c-float">🍜</span><span class="c-float">🥟</span>
+        <span class="c-float">🍱</span><span class="c-float">🧆</span>
+        <span class="c-float">🍛</span><span class="c-float">🥢</span>
+      </div>
+      <div class="c-logo-area">
+        <div class="c-logo-ring">
+          <div class="c-ring-outer"></div>
+          <div class="c-ring-inner"></div>
+          <img class="c-logo-img" src="assets/Logo.png" alt="懶飽飽 Logo" />
+        </div>
+        <div class="c-brand-name">
+          <div class="c-brand-zh">懶飽飽</div>
+          <div class="c-brand-en">LazyBaoBao</div>
+        </div>
+        <div class="c-tagline">
+          <span class="c-tagline-pill">✦ {{ lang.tagline }} ✦</span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="c-right">
+
+      <div class="c-form-header">
+        <div class="c-welcome">{{ lang.joinUs }}</div>
+        <h3>{{ lang.registerTitle }}</h3>
+        <p>{{ lang.registerSubtitle }}</p>
+      </div>
+
+      <!-- 必填提示 + 居住地選擇 -->
+      <div class="c-hint-row">
+        <p class="c-required-hint">{{ lang.requiredHint }}</p>
+        <div class="c-region-select-wrap">
+          <span class="c-region-icon">🌏</span>
+          <select
+            class="c-region-select"
+            [value]="selectedRegionsId"
+            (change)="onRegionChange($event)"
+          >
+            @for (r of regions; track r.id) {
+              <option [value]="r.id">{{ r.country }}</option>
+            }
+          </select>
+          <span class="c-region-arrow">▾</span>
+        </div>
+      </div>
+
+      <!-- 會員名稱 -->
+      <div class="c-field">
+        <label>{{ lang.nameLbl }} <span class="c-required-mark">*</span></label>
+        <input
+          type="text"
+          [(ngModel)]="name"
+          name="name"
+          [placeholder]="lang.namePlaceholder"
+          autocomplete="name"
+          maxlength="50"
+          [class.c-input-error]="nameError"
+          (input)="clearError('name')"
+        />
+        @if (nameError) {
+          <div class="c-error-msg">{{ lang.nameError }}</div>
+        }
+      </div>
+
+      <!-- 手機號碼 -->
+      <div class="c-field">
+        <label>{{ lang.phoneLbl }} <span class="c-required-mark">*</span></label>
+        <div class="c-phone-wrap" [class.c-input-error]="phoneError">
+          <span class="c-dial-badge">{{ dialLabel }}</span>
+          <span class="c-phone-sep">|</span>
+          <input
+            type="tel"
+            class="c-phone-input"
+            [(ngModel)]="phone"
+            name="phone"
+            [placeholder]="lang.phonePlaceholder"
+            autocomplete="tel"
+            maxlength="15"
+            (input)="clearError('phone')"
+          />
+        </div>
+        @if (phoneError) {
+          <div class="c-error-msg">✗ {{ phoneErrorMsg }}</div>
+        }
+      </div>
+
+      <!-- 密碼 -->
+      <div class="c-field">
+        <label>{{ lang.passwordLbl }} <span class="c-required-mark">*</span></label>
+        <div class="c-password-wrap" [class.c-input-error]="passwordError">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            [placeholder]="lang.passwordPlaceholder2"
+            autocomplete="new-password"
+            (input)="clearError('password')"
+          />
+          <button type="button" class="c-eye-btn" [class.is-visible]="showPassword" (click)="togglePassword()"
+            [attr.aria-label]="showPassword ? lang.hidePwd : lang.showPwd">
+            @if (!showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+            @if (showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (passwordError) {
+          <div class="c-error-msg">{{ lang.passwordError }}</div>
+        }
+      </div>
+
+      <!-- 確認密碼 -->
+      <div class="c-field">
+        <label>{{ lang.confirmPasswordLbl }} <span class="c-required-mark">*</span></label>
+        <div class="c-password-wrap" [class.c-input-error]="confirmError">
+          <input
+            [type]="showConfirmPassword ? 'text' : 'password'"
+            [(ngModel)]="confirmPassword"
+            name="confirmPassword"
+            [placeholder]="lang.confirmPlaceholder"
+            autocomplete="new-password"
+            (input)="clearError('confirm')"
+          />
+          <button type="button" class="c-eye-btn" [class.is-visible]="showConfirmPassword" (click)="toggleConfirmPassword()"
+            [attr.aria-label]="showConfirmPassword ? lang.hidePwd : lang.showPwd">
+            @if (!showConfirmPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+            @if (showConfirmPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            }
+          </button>
+        </div>
+        @if (confirmError) {
+          <div class="c-error-msg">{{ lang.confirmError }}</div>
+        }
+      </div>
+
+      <button class="c-register-submit-btn" (click)="onRegister()">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16" aria-hidden="true">
+          <path d="M12 5H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9"/>
+          <path d="M15 3l2 2-6 6H9v-2l6-6z"/>
+        </svg>
+        {{ lang.registerSubmit }}
+      </button>
+
+      <div class="c-back-login">
+        {{ lang.hasAccount }}
+        <a class="c-back-link" [routerLink]="['/customer-login']">{{ lang.backToLogin }}</a>
+      </div>
+
+    </section>
+  </div>
+</div>
+
+<!-- ===== 註冊成功彈出視窗 ===== -->
+@if (showSuccessModal) {
+  <div class="c-success-overlay">
+    <div class="c-success-modal">
+      <div class="c-success-icon">🎉</div>
+      <div class="c-success-title">註冊會員成功 ! !</div>
+      <div class="c-success-msg">將自動導回登入頁面...</div>
+      <div class="c-success-bar">
+        <div class="c-success-bar-fill"></div>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,132 @@
+<!--
+  =====================================================
+  檔案名稱：customer-loading.component.html
+  位置說明：src/app/shared/customer-loading/customer-loading.component.html
+  用途說明：客戶端 Loading 過場動畫 — 完全對應 loading_v4.html 版面
+  版面說明：
+    全螢幕奶油白遮罩（含雙橢圓輻射漸層）
+    食物粒子：固定定位，從畫面底部浮起（floatUp 動畫）
+    中央分割卡片（700px）：
+      左側面板（290px）：旋轉虛線軌道環 + 大圓形 Logo + 品牌文字區塊
+      右側面板（flex:1）：Lottie 動畫框 + 標籤 + 分隔線 + 百分比進度條 + 狀態列
+  Angular 知識點：
+    #overlay   → GSAP 遮罩淡入
+    #card      → GSAP 卡片彈出
+    #lottieBox → lottie-web 渲染目標容器
+    #pctNum    → TypeScript 直接更新百分比文字
+  =====================================================
+-->
+
+
+<!-- 全螢幕遮罩（雙橢圓輻射漸層底色） -->
+<div class="cl-overlay" #overlay>
+
+  <!-- ── 食物粒子（loading_v4.html JS 產生，此處靜態展開 12 個）──
+       position:fixed，z-index:0，在卡片（z-index:10）後方浮動
+       每個粒子設定不同 left / animation-delay / animation-duration / font-size
+  ── -->
+  <span class="food" style="left:5vw;  animation-delay:0s;   animation-duration:9s;  font-size:18px;">🍜</span>
+  <span class="food" style="left:13vw; animation-delay:0.6s; animation-duration:11s; font-size:22px;">🍛</span>
+  <span class="food" style="left:22vw; animation-delay:1.1s; animation-duration:8s;  font-size:16px;">🌮</span>
+  <span class="food" style="left:34vw; animation-delay:1.7s; animation-duration:10s; font-size:20px;">🍣</span>
+  <span class="food" style="left:46vw; animation-delay:2.2s; animation-duration:9s;  font-size:17px;">🥘</span>
+  <span class="food" style="left:55vw; animation-delay:2.8s; animation-duration:12s; font-size:21px;">🍱</span>
+  <span class="food" style="left:65vw; animation-delay:3.3s; animation-duration:8s;  font-size:15px;">🥟</span>
+  <span class="food" style="left:72vw; animation-delay:3.8s; animation-duration:11s; font-size:23px;">🍤</span>
+  <span class="food" style="left:80vw; animation-delay:4.3s; animation-duration:9s;  font-size:19px;">🧆</span>
+  <span class="food" style="left:87vw; animation-delay:4.9s; animation-duration:10s; font-size:16px;">🥗</span>
+  <span class="food" style="left:93vw; animation-delay:5.2s; animation-duration:8s;  font-size:22px;">🍝</span>
+  <span class="food" style="left:18vw; animation-delay:5.5s; animation-duration:11s; font-size:17px;">🍲</span>
+
+
+  <!-- 分割卡片主體 -->
+  <div class="card" #card>
+
+
+    <!-- ════════════════════════════════════════════
+       左側面板：橘色四段漸層，品牌視覺展示
+       ════════════════════════════════════════════ -->
+    <div class="panel-left">
+
+      <!-- 旋轉虛線軌道環（orbit-1 順轉 24s，orbit-2 逆轉 18s） -->
+      <div class="orbit orbit-1"></div>
+      <div class="orbit orbit-2"></div>
+
+      <!-- 圓形 Logo（drop-shadow 濾鏡，無白色圓框，logoFloat 上下飄浮） -->
+      <img
+        class="logo-img"
+        src="assets/logo圓形.png"
+        alt="懶飽飽 Logo"
+      />
+
+      <!-- 品牌文字區塊 -->
+      <div class="left-text">
+        <!-- 金黃色楷書中文名稱 -->
+        <div class="left-brand">懶 飽 飽</div>
+        <!-- 白色半透明斜體英文副標 -->
+        <div class="left-en">Global Meals</div>
+        <!-- 金色邊框標語徽章（badgeGlow 脈動） -->
+        <div class="left-badge">{{ lang().loadingTagline }}</div>
+      </div>
+
+    </div>
+    <!-- 左側面板結束 -->
+
+
+    <!-- ════════════════════════════════════════════
+       右側面板：純白背景，動畫與載入狀態
+       ════════════════════════════════════════════ -->
+    <div class="panel-right">
+
+      <!-- Lottie 動畫區塊
+           #lottieBox → TypeScript 用 lottie-web 渲染 scan-to-order.json
+           lottie-label → "Scan to Order" 標籤文字，兩側各有漸層橫線 -->
+      <div class="lottie-wrap">
+        <div class="lottie-box" #lottieBox></div>
+        <div class="lottie-label">Scan to Order</div>
+      </div>
+
+      <!-- 水平分隔線（左右兩端透明漸出） -->
+      <div class="h-div"></div>
+
+      <!-- 進度條區塊 -->
+      <div class="progress-section">
+
+        <!-- 百分比列：左側「LOADING」文字 + 右側跳動數字 -->
+        <div class="pct-row">
+          <span class="pct-label">LOADING</span>
+          <!-- #pctNum → TypeScript requestAnimationFrame 更新文字 -->
+          <span class="pct-num" #pctNum>0%</span>
+        </div>
+
+        <!-- 進度條軌道
+             .fill → CSS fillAnim 動畫填充
+             .shimmer → 白色光帶從左到右掃過 -->
+        <div class="track">
+          <div class="fill"></div>
+          <div class="shimmer"></div>
+        </div>
+
+      </div>
+      <!-- 進度條區塊結束 -->
+
+
+      <!-- 狀態列：三個顏色點（dotPop 放大脈動）+ 雙語等待文字 -->
+      <div class="status-row">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <!-- blink 動畫讓文字透明度交替 -->
+        <span class="wait-text">{{ lang().loadingWait }}</span>
+      </div>
+
+
+    </div>
+    <!-- 右側面板結束 -->
+
+
+  </div>
+  <!-- 分割卡片結束 -->
+
+</div>
+<!-- 全螢幕遮罩結束 -->

@@ -1,0 +1,29 @@
+<!--
+  =====================================================
+  檔案名稱：app.component.html
+  用途說明：應用程式根模板（整個 App 最外層的 HTML）
+  修改說明：
+    新增兩個 Loading 遮罩的條件渲染區塊
+  說明：
+    @if 是 Angular 17+ 的條件控制流（不需要 import NgIf）
+    當 loadingService.isLoading 為 true 時才渲染對應的 Loading 元件
+    loadingType === 'staff'    → 顯示深海軍藍管理端 Loading
+    loadingType === 'customer' → 顯示橘紅暖色客戶端 Loading
+  =====================================================
+-->
+
+
+<!-- 管理端 Loading 遮罩（深海軍藍 + 金黃圓環）
+     當使用者切換到管理系統時顯示 -->
+@if (loadingService.isLoading && loadingService.loadingType === 'staff') {
+  <app-staff-loading [subtitle]="loadingService.loadingSubtitle"></app-staff-loading>
+}
+
+<!-- 客戶端 Loading 遮罩（奶油白 + 橘紅彈跳點）
+     當使用者切換到客戶入口時顯示 -->
+@if (loadingService.isLoading && loadingService.loadingType === 'customer') {
+  <app-customer-loading></app-customer-loading>
+}
+
+<!-- Angular 路由出口：根據當前網址自動渲染對應的頁面元件 -->
+<router-outlet />

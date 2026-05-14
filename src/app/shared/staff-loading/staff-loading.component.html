@@ -1,0 +1,49 @@
+<!--
+  =====================================================
+  檔案名稱：staff-loading.component.html
+  位置說明：src/app/shared/staff-loading/staff-loading.component.html
+  用途說明：管理系統 Loading 遮罩的 HTML 結構
+  設計說明：
+    深海軍藍半透明遮罩（rgba(30, 58, 95, 0.92)）
+    中央浮動卡片：金黃色圓環 Loader + 說明文字
+  重要說明：
+    #overlay 和 #contentBox 是「範本參考變數」（Template Reference Variables）
+    Angular 用 # 符號標記 DOM 元素，供 TypeScript 裡的 @ViewChild 取得
+    GSAP 拿到這些元素後，就能對它們做動畫
+  =====================================================
+-->
+
+
+<!-- 全螢幕半透明遮罩，固定覆蓋整個視窗，z-index 最高 -->
+<div class="staff-loading-overlay" #overlay>
+
+  <!-- 中央浮動卡片，GSAP 會讓這個從下方滑入 -->
+  <div class="staff-loading-box" #contentBox>
+
+    <!--
+      ldrs <l-ring>：圓環旋轉 Loader
+      size="64"        → 直徑 64px
+      stroke="5"       → 圓環線條粗細 5px
+      bg-opacity="0.15"→ 背景圓環的透明度（淡灰色底圈）
+      speed="1.5"      → 旋轉速度（數字越大越快）
+      color="#F0A500"  → 金黃色，符合管理端配色
+    -->
+    <l-ring
+      size="64"
+      stroke="5"
+      bg-opacity="0.15"
+      speed="1.5"
+      color="#F0A500"
+    ></l-ring>
+
+    <!-- 文字說明區塊 -->
+    <div class="staff-loading-text">
+      <span class="staff-loading-title">系統驗證中</span>
+      <span class="staff-loading-sub">{{ subtitle }}</span>
+    </div>
+
+  </div>
+  <!-- 中央浮動卡片結束 -->
+
+</div>
+<!-- 全螢幕遮罩結束 -->

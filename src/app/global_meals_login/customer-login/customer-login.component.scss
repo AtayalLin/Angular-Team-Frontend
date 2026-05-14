@@ -1,0 +1,1046 @@
+/*
+ * =====================================================
+ * 檔案名稱：customer-login.component.scss
+ * 用途說明：客戶登入頁面的所有樣式
+ * 包含區塊：頁面容器、頂部導覽列、主框架、左側品牌視覺、右側表單欄、響應式設計
+ * 色彩說明（方案二：台灣活力市集）：
+ *   活力橘紅（主色）      #D95C1A
+ *   深橘（輔助色）        #A84210
+ *   亮金黃（點綴色）      #F0A500
+ *   主要文字色            #3D2010
+ *   次要文字色            #6A4830
+ *   頁面背景色            #FFFAF3
+ *   奶油白背景            #FFFAF3
+ *   邊框線條色            #F0D8B8
+ * =====================================================
+ */
+
+
+/* =====================================================
+   頁面整體容器（取代原本 body 的角色）
+   :host 代表這個 Angular Component 元件本身的標籤
+
+   無捲動設計說明：
+   - height: 100dvh    讓容器精確等於裝置視窗高度（dvh = dynamic viewport height）
+   - overflow: hidden  徹底禁止捲動條出現
+   - padding-top       用 clamp() 為頂部固定導覽列保留足夠空間
+   - box-sizing        讓 padding 不會超出 100dvh 的範圍
+   ===================================================== */
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding-top: clamp(52px, 7.5vh, 72px);
+    padding-right: clamp(12px, 2vw, 24px);
+    padding-bottom: clamp(12px, 2vh, 20px);
+    padding-left: clamp(12px, 2vw, 24px);
+    background-color: #FFFAF3;
+    overflow: hidden;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+
+/* =====================================================
+   頂部導覽列：固定在頁面頂端，用來切換管理系統 / 客戶入口
+   position: fixed  讓它永遠固定在畫面頂端，不隨捲動移動
+   transform        讓它水平置中
+   ===================================================== */
+.mode-nav {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(217, 92, 26, 0.2);
+}
+
+/* 導覽列裡的每一個連結按鈕 */
+.mode-nav a {
+    padding: 10px 28px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* 另一個頁面的連結按鈕（管理系統）— 淺色表示「未選中」 */
+.mode-nav .nav-staff {
+    background-color: #EDE8DC;
+    color: #9A9080;
+    border-radius: 14px 0 0 14px;
+}
+
+/* 滑鼠移到管理系統按鈕時，顏色略深表示可以點擊 */
+.mode-nav .nav-staff:hover {
+    background-color: #E0D8C8;
+    color: #6A6050;
+}
+
+/* 目前所在頁面的按鈕（客戶入口）— 主色背景表示「已選中」，跟隨國家切換 */
+.mode-nav .nav-customer {
+    background-color: var(--c-primary);
+    color: #ffffff;
+    border-radius: 0 14px 14px 0;
+}
+
+
+/* =====================================================
+   主框架：包住整個左右兩欄的外殼
+
+   無捲動設計說明：
+   - flex: 1         讓 shell 撐滿 :host 扣除 padding 後的剩餘高度
+   - min-height: 0   Flexbox 必要設定，允許子元素縮小到比內容更小，防止溢出
+   - 不設固定高度    改由父層 :host 的 height: 100dvh 控制整體高度
+
+   深度感說明：
+   - box-shadow 使用兩層：橘紅色調外層陰影與中性黑內層，製造暖色系浮起感
+   ===================================================== */
+.shell {
+    flex: 1;
+    min-height: 0;
+    width: min(1080px, 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+        0 24px 60px rgba(217, 92, 26, 0.16),
+        0 8px 20px rgba(0, 0, 0, 0.07);
+}
+
+/* 面板：在 shell 裡佔滿全部空間，分成左右兩欄
+   grid-template-columns: 42% 58% 表示左欄佔 42%、右欄佔 58% */
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 42% 58%;
+}
+
+/* 整個客戶面板的背景底色 */
+#customer-panel {
+    background-color: #FFFAF3;
+}
+
+
+/* =====================================================
+   左側品牌視覺欄
+   暖色漸層背景，放置 Logo、品牌名稱與浮動食物裝飾
+   漸層使用暖奶油到淺橘的過渡，呼應活力橘紅主色
+   ===================================================== */
+.c-left {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: clamp(24px, 4vh, 40px);
+    padding-right: clamp(18px, 3vw, 28px);
+    padding-bottom: clamp(24px, 4vh, 40px);
+    padding-left: clamp(18px, 3vw, 28px);
+    /* 160 度方向的暖色漸層背景，由淺奶油到淺橘 */
+    background: linear-gradient(160deg, #FFF5E0 0%, #FFE5BC 45%, #FFD09A 100%);
+}
+
+/* 裝飾用的發光圓形色塊：右上角（偏金黃色，呼應點綴色 #F0A500） */
+.c-blob1 {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 165, 0, 0.22) 0%, transparent 70%);
+}
+
+/* 裝飾用的發光圓形色塊：左下角（偏橘紅色，呼應主色 #D95C1A） */
+.c-blob2 {
+    position: absolute;
+    bottom: -40px;
+    left: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 92, 26, 0.16) 0%, transparent 70%);
+}
+
+/* 浮動食物圖示的容器（pointer-events: none 讓它不影響點擊操作） */
+.c-floats {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+/* 每個浮動的食物 emoji */
+.c-float {
+    position: absolute;
+    font-size: 24px;
+    animation: floatUp 6s ease-in-out infinite;
+    opacity: 0.45;
+}
+
+/* 各個食物 emoji 的位置與動畫延遲（讓它們不同步，更自然） */
+.c-float:nth-child(1) {
+    top: 10%;
+    left: 8%;
+    animation-delay: 0s;
+    font-size: 20px;
+}
+
+.c-float:nth-child(2) {
+    top: 18%;
+    right: 10%;
+    animation-delay: 1.2s;
+    font-size: 26px;
+}
+
+.c-float:nth-child(3) {
+    top: 72%;
+    left: 12%;
+    animation-delay: 2.1s;
+    font-size: 22px;
+}
+
+.c-float:nth-child(4) {
+    top: 80%;
+    right: 8%;
+    animation-delay: 0.7s;
+    font-size: 18px;
+}
+
+.c-float:nth-child(5) {
+    top: 44%;
+    left: 5%;
+    animation-delay: 3s;
+    font-size: 16px;
+}
+
+.c-float:nth-child(6) {
+    top: 55%;
+    right: 5%;
+    animation-delay: 1.8s;
+    font-size: 20px;
+}
+
+/* 浮動動畫：上下飄移並略微旋轉 */
+@keyframes floatUp {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-14px) rotate(5deg);
+    }
+}
+
+
+/* =====================================================
+   Logo 圖片區域（含旋轉外圈裝飾）
+   ===================================================== */
+.c-logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+/* Logo 的外層容器，控制整體大小
+   clamp() 讓 Logo 依照視窗高度等比縮放 */
+.c-logo-ring {
+    position: relative;
+    width: clamp(200px, 34vh, 320px);
+    height: clamp(200px, 34vh, 320px);
+}
+
+/* 外圈：橘紅色虛線邊框，緩慢順時針旋轉 */
+.c-ring-outer {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    bottom: -12px;
+    left: -12px;
+    border: 3px dashed rgba(217, 92, 26, 0.35);
+    border-radius: 50%;
+    animation: spinSlow 30s linear infinite;
+}
+
+/* 內圈：金黃色實線邊框，緩慢逆時針旋轉 */
+.c-ring-inner {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    border: 2px solid rgba(240, 165, 0, 0.3);
+    border-radius: 50%;
+    animation: spinSlow 20s linear infinite reverse;
+}
+
+/* 旋轉動畫（供外圈和內圈共用） */
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Logo 圓形圖片本體
+   box-shadow 使用橘紅色光暈，呼應主色 */
+.c-logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: 0 16px 50px rgba(217, 92, 26, 0.28), 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    display: block;
+}
+
+/* 品牌名稱區塊 */
+.c-brand-name {
+    margin-top: clamp(14px, 2.5vh, 22px);
+    text-align: center;
+}
+
+/* 中文品牌名稱：改用 LXGW WenKai TC 楷書字體
+   楷書筆觸讓品牌文字更溫暖、更有手作質感 */
+.c-brand-zh {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(28px, 5vh, 44px);
+    font-weight: 900;
+    color: #3D2010;
+    letter-spacing: 5px;
+}
+
+/* 英文品牌名稱：改用 Fraunces 斜體，活潑且有個性 */
+.c-brand-en {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(14px, 1.9vh, 17px);
+    color: #D95C1A;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+/* 標語區塊 */
+.c-tagline {
+    margin-top: clamp(12px, 2vh, 20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 標語藥丸型標籤
+   border 使用橘紅色，文字使用深橘色 */
+.c-tagline-pill {
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(217, 92, 26, 0.22);
+    border-radius: 30px;
+    padding-top: 7px;
+    padding-right: 22px;
+    padding-bottom: 7px;
+    padding-left: 22px;
+    font-size: clamp(14px, 1.7vh, 15px);
+    color: #A84210;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   右側表單欄
+   奶油白背景，放置登入相關的表單與按鈕
+   overflow: hidden 確保表單內容不溢出 shell 邊界
+
+   深度感說明：
+   - inset box-shadow 從左側投射淡橘暖陰影，呼應左側暖色漸層背景
+   - 製造左右兩欄之間的自然光影過渡，而非生硬切分
+   ===================================================== */
+.c-right {
+    background-color: #FFFAF3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(8px, 1.6vh, 16px);
+    padding-top: clamp(8px, 1.5vh, 18px);
+    padding-right: clamp(24px, 5vw, 60px);
+    padding-bottom: clamp(8px, 1.5vh, 18px);
+    padding-left: clamp(24px, 5vw, 60px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 8px 0 40px rgba(217, 92, 26, 0.05);
+}
+
+/* 分店選擇器：絕對定位於 c-right 右上角 */
+.c-branch-selector {
+    position: absolute;
+    top: 14px;
+    right: clamp(20px, 4vw, 40px);
+    z-index: 20;
+}
+
+.c-branch-trigger {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: rgba(255, 250, 243, 0.95);
+    border: 1.5px solid rgba(217, 92, 26, 0.28);
+    border-radius: 100px;
+    padding: 5px 10px 5px 9px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6b3a1f;
+    white-space: nowrap;
+    transition: border-color 0.18s, box-shadow 0.18s;
+    font-family: inherit;
+
+    &:hover {
+        border-color: rgba(217, 92, 26, 0.55);
+        box-shadow: 0 2px 8px rgba(217, 92, 26, 0.12);
+    }
+}
+
+.c-branch-chevron {
+    transition: transform 0.2s ease;
+    &.open { transform: rotate(180deg); }
+}
+
+/* 下拉選單清單：對齊 trigger 右側 */
+.c-branch-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    min-width: 100%;
+    background: #fffaf3;
+    border: 1.5px solid rgba(217, 92, 26, 0.22);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(109, 58, 31, 0.13);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.c-branch-opt {
+    padding: 9px 16px;
+    text-align: left;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: #6b3a1f;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    font-family: inherit;
+    transition: background 0.15s;
+
+    &:hover   { background: rgba(217, 92, 26, 0.07); }
+    &.active  {
+        background: rgba(217, 92, 26, 0.12);
+        font-weight: 700;
+        color: #c25a15;
+    }
+}
+
+/* 右側欄右上角的裝飾性發光圓形（偽元素）
+   使用金黃色光暈，呼應點綴色 #F0A500 */
+.c-right::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 165, 0, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* 表單頂部的標題區塊 */
+.c-form-header {
+    flex-shrink: 0;
+}
+
+/* 頂部的「歡迎回來」小標籤
+   使用金黃漸層背景，橘紅色邊框與文字 */
+.c-welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #FFF5DC, #FFE8B0);
+    border: 1.5px solid rgba(217, 92, 26, 0.22);
+    border-radius: 20px;
+    padding-top: 4px;
+    padding-right: 14px;
+    padding-bottom: 4px;
+    padding-left: 14px;
+    font-size: clamp(14px, 1.6vh, 15px);
+    color: #D95C1A;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+/* 主標題：改用 LXGW WenKai TC，與品牌名稱字體一致，整體風格統一 */
+.c-form-header h3 {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(20px, 3.2vh, 32px);
+    font-weight: 900;
+    color: #3D2010;
+    line-height: 1.3;
+    letter-spacing: 1px;
+}
+
+/* 副標題說明文字 */
+.c-form-header p {
+    font-size: clamp(14px, 1.6vh, 15px);
+    color: #6A4830;
+    margin-top: 5px;
+}
+
+
+/* =====================================================
+   表單輸入欄位
+   ===================================================== */
+.c-field {
+    flex-shrink: 0;
+}
+
+/* 欄位標籤文字 */
+.c-field label {
+    display: block;
+    font-size: clamp(14px, 1.7vh, 15px);
+    font-weight: 700;
+    color: #3D2010;
+    margin-bottom: clamp(4px, 0.8vh, 8px);
+    letter-spacing: 0.5px;
+}
+
+/* 文字輸入框 */
+.c-field input {
+    width: 100%;
+    height: clamp(48px, 7.5vh, 64px);
+    border: 2px solid #F0D8B8;
+    border-radius: 14px;
+    padding-top: 0;
+    padding-right: 18px;
+    padding-bottom: 0;
+    padding-left: 18px;
+    font-size: clamp(14px, 1.9vh, 17px);
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #ffffff;
+    color: #3D2010;
+    outline: none;
+    transition: all 0.25s;
+    box-sizing: border-box;
+}
+
+/* 輸入框獲得焦點時：跟隨國家主色 */
+.c-field input:focus {
+    border-color: var(--c-primary);
+    box-shadow: 0 0 0 3px rgba(217, 92, 26, 0.10);
+}
+
+/* 輸入框的提示文字顏色 */
+.c-field input::placeholder {
+    color: #C8A888;
+}
+
+
+/* =====================================================
+   密碼欄位容器（含眼睛切換按鈕）
+   ===================================================== */
+
+/* 相對定位容器，讓眼睛按鈕可以用絕對定位貼在右側 */
+.c-password-wrap {
+    position: relative;
+    display: block;
+}
+
+/* 容器內的 input 需要右側留出空間，避免文字被按鈕遮住 */
+.c-password-wrap input {
+    padding-right: 50px;
+}
+
+/* 眼睛切換按鈕：絕對定位在輸入框右側垂直置中 */
+.c-eye-btn {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    color: #C8A888;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+/* 滑鼠移到眼睛按鈕時：顏色加深，背景略暖 */
+.c-eye-btn:hover {
+    color: #3D2010;
+    background-color: rgba(217, 92, 26, 0.07);
+}
+
+/* is-visible class：密碼顯示中時，圖示改為橘紅色（代表「目前可見」狀態） */
+.c-eye-btn.is-visible {
+    color: #D95C1A;
+}
+
+/* 眼睛 SVG 圖示的大小 */
+.c-eye-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+
+/* =====================================================
+   按鈕群組（登入、註冊）
+   ===================================================== */
+
+/* 登入按鈕與註冊按鈕的容器
+   flex-direction: row  讓兩個按鈕並排於同一行
+   各自設定 flex: 1     讓它們等寬平均分配空間 */
+.c-btn-group {
+    display: flex;
+    flex-direction: row;
+    gap: clamp(8px, 1.5vw, 12px);
+    flex-shrink: 0;
+}
+
+/* 登入按鈕：橘紅漸層背景，主要操作按鈕
+   漸層從活力橘紅 #D95C1A 到深橘 #A84210
+   flex: 1  讓它與註冊按鈕等寬並排
+
+   深度感設計說明：
+   - box-shadow 三層：擴散陰影 + 近距陰影 + inset 高光線
+   - ::after 光澤掃過效果加速至 0.38s，視覺反應更靈敏
+   - :active 模擬真實按壓下沉感 */
+.c-login-btn {
+    flex: 1;
+    width: auto;
+    height: clamp(50px, 7.5vh, 62px);
+    background: linear-gradient(145deg, var(--c-primary) 0%, var(--c-hover) 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(15px, 2.1vh, 18px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    box-shadow:
+        0 8px 22px rgba(217, 92, 26, 0.34),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 登入按鈕上的光澤掃過效果（偽元素，初始位置在按鈕左方外面） */
+.c-login-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.38s ease;
+}
+
+/* 滑鼠移到登入按鈕時：光澤從左掃到右 */
+.c-login-btn:hover::after {
+    transform: translateX(100%);
+}
+
+/* 滑鼠移到登入按鈕時：往上移動、陰影加深 */
+.c-login-btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 16px 38px rgba(217, 92, 26, 0.44),
+        0 4px 10px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+/* 按下按鈕時：下沉回去，陰影縮小，模擬真實按壓回饋 */
+.c-login-btn:active {
+    transform: translateY(1px);
+    transition: all 0.08s;
+    box-shadow:
+        0 3px 10px rgba(217, 92, 26, 0.28),
+        0 1px 3px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* 註冊按鈕：白色背景橘紅色邊框，次要操作按鈕
+   flex: 1  與登入按鈕等寬並排，高度統一 */
+.c-register-btn {
+    flex: 1;
+    width: auto;
+    height: clamp(50px, 7.5vh, 62px);
+    background-color: #ffffff;
+    color: var(--c-primary);
+    border: 2.5px solid var(--c-primary);
+    border-radius: 16px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(14px, 1.9vh, 17px);
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s;
+}
+
+/* 滑鼠移到註冊按鈕時：填入主色、文字變白 */
+.c-register-btn:hover {
+    background-color: var(--c-primary);
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(217, 92, 26, 0.24);
+}
+
+
+/* =====================================================
+   「或者」分隔線
+   ===================================================== */
+.c-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #6A4830;
+    font-size: clamp(14px, 1.6vh, 15px);
+    letter-spacing: 1.5px;
+    flex-shrink: 0;
+}
+
+/* 分隔線的左右兩條橫線（用偽元素製作） */
+.c-divider::before,
+.c-divider::after {
+    content: '';
+    flex: 1;
+    height: 1.5px;
+    background-color: #F0D8B8;
+}
+
+
+/* =====================================================
+   訪客快速點餐按鈕
+   ===================================================== */
+.c-guest-btn {
+    width: 100%;
+    height: clamp(48px, 7.2vh, 62px);
+    background-color: #ffffff;
+    color: #3D2010;
+    border: 2px solid #F0D8B8;
+    border-radius: 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(14px, 1.9vh, 17px);
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+
+/* 滑鼠移到訪客按鈕時：邊框變橘紅色、文字變橘紅色 */
+.c-guest-btn:hover {
+    border-color: #D95C1A;
+    background-color: #FFF5E8;
+    color: #D95C1A;
+}
+
+
+/* ── CSS 變數（國家主題，由 BranchService 動態注入到 :root）──
+   預設值 = 台灣色盤；切換國家時 BranchService.applyTheme() 會覆蓋
+   ─────────────────────────────────────────────────────────────── */
+:host {
+    --c-primary: var(--brand-primary, #D95C1A);
+    --c-hover: var(--brand-hover, #A84210);
+    --c-bg: var(--brand-bg, #FFFAF3);
+    background-color: var(--c-bg);
+}
+
+/* ── 國家 / 分店切換列 ──────────────────────────────
+   固定在 mode-nav 正下方，切換台灣 / 日本 / 韓國
+   ─────────────────────────────────────────────────── */
+.c-country-switch {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    gap: 6px;
+    background-color: rgba(255, 250, 243, 0.90);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(var(--brand-primary, 217 92 26) / 0.15);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.c-country-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 9px;
+    background-color: transparent;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #9A8070;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.c-country-btn .c-flag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.c-country-btn:hover {
+    background-color: rgba(217, 92, 26, 0.08);
+    color: #3D2010;
+}
+
+.c-country-btn.is-active {
+    background-color: var(--c-primary);
+    color: #ffffff;
+}
+
+.c-country-btn.is-active .c-flag-dot {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+/* 各國旗幟代表色 */
+.c-flag-tw {
+    background-color: #CE1126;
+}
+
+.c-flag-jp {
+    background-color: #BC002D;
+}
+
+.c-flag-kr {
+    background-color: #003478;
+}
+
+/* =====================================================
+   響應式設計：畫面寬度小於 860px 時（手機或小平板）
+   隱藏左側品牌欄，讓右側表單佔滿全寬
+   ===================================================== */
+@media (max-width: 860px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+
+    .c-left {
+        display: none;
+    }
+
+    .c-right {
+        grid-column: 1 / -1;
+        padding-right: clamp(20px, 6vw, 40px);
+        padding-left: clamp(20px, 6vw, 40px);
+    }
+}
+
+/* 480px：縮小 mode-nav 與 country-switch 的 padding */
+@media (max-width: 480px) {
+    :host {
+        padding-top: clamp(108px, 16vh, 128px);
+        /* 為雙列 fixed bar 保留空間 */
+    }
+
+    .mode-nav {
+        top: 10px;
+    }
+
+    .mode-nav a {
+        padding: 8px 18px;
+        font-size: 12px;
+        letter-spacing: 0.5px;
+    }
+
+    .c-country-switch {
+        top: 54px;
+        gap: 3px;
+        padding: 3px;
+    }
+
+    .c-country-btn {
+        padding: 5px 10px;
+        font-size: 11.5px;
+        gap: 4px;
+    }
+
+    .c-form-header h3 {
+        font-size: clamp(18px, 4.5vw, 26px);
+    }
+
+    .c-btn-group {
+        flex-direction: column;
+    }
+
+    .c-login-btn,
+    .c-register-btn {
+        flex: none;
+        width: 100%;
+    }
+}
+
+/* 375px：最小螢幕微調 */
+@media (max-width: 375px) {
+    .mode-nav a {
+        padding: 7px 13px;
+        font-size: 11.5px;
+    }
+
+    .c-country-btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .c-right {
+        padding-right: 16px;
+        padding-left: 16px;
+    }
+}
+
+/* 減少動畫（使用者偏好）*/
+@media (prefers-reduced-motion: reduce) {
+
+    .c-float,
+    .c-ring-outer,
+    .c-ring-inner,
+    .c-login-btn::after {
+        animation: none;
+        transition: none;
+    }
+}
+
+
+/* ── 按鈕內 SVG 對齊 ─────────────────────────────── */
+.c-login-btn svg,
+.c-register-btn svg,
+.c-guest-btn svg,
+.c-welcome svg {
+    display: block;
+    flex-shrink: 0;
+}
+
+/* ── 登入失敗錯誤訊息 ─────────────────────────────── */
+.c-error-msg {
+    font-size: 13px;
+    color: #C0392B;
+    background-color: rgba(192, 57, 43, 0.08);
+    border: 1px solid rgba(192, 57, 43, 0.25);
+    border-radius: 8px;
+    padding: 9px 14px;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+
+/* ── 測試帳號提示區塊（⚠ 未來串接後端後移除）─────── */
+.c-test-hint {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+    color: #A84210;
+    background-color: rgba(240, 165, 0, 0.08);
+    border: 1px dashed rgba(240, 165, 0, 0.5);
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-family: 'DM Mono', monospace;
+}
+
+.c-test-label {
+    font-weight: 700;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 11px;
+    color: #6A4830;
+    margin-bottom: 2px;
+}
+
+/* ── QR Code 現場點餐區塊 ── */
+.c-qr-block {
+    margin-top: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.c-qr-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6b3a1f;
+    letter-spacing: 0.04em;
+}
+
+.c-qr-wrap {
+    background: #fffaf3;
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 2px 10px rgba(107, 58, 31, 0.15);
+    border: 2px solid rgba(217, 92, 26, 0.25);
+}
+
+.c-qr-hint {
+    font-size: 11px;
+    color: #A84210;
+    text-align: center;
+    opacity: 0.85;
+}

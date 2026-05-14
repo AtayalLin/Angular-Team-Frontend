@@ -1,0 +1,347 @@
+:host {
+  display: block;
+  height: 100dvh;
+  background-color: #FFFAF3;
+  overflow: hidden;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* ── 全螢幕置中殼層 ─────────────────────────────── */
+.qr-shell {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  height: 100%;
+  padding: 40px 24px;
+  box-sizing: border-box;
+}
+
+/* ── 背景裝飾色塊 ────────────────────────────────── */
+.qr-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.qr-blob--top {
+  top: -80px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(240, 165, 0, 0.18) 0%, transparent 70%);
+}
+
+.qr-blob--bottom {
+  bottom: -60px;
+  left: -80px;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, rgba(217, 92, 26, 0.13) 0%, transparent 70%);
+}
+
+/* ── 旋轉圈組 ────────────────────────────────────── */
+.qr-rings {
+  position: relative;
+  width: 180px;
+  height: 180px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  flex-shrink: 0;
+}
+
+.qr-ring {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.qr-ring--outer {
+  width: 220px;
+  height: 220px;
+  border: 3px dashed rgba(217, 92, 26, 0.28);
+  animation: spinCW 28s linear infinite;
+}
+
+.qr-ring--mid {
+  width: 190px;
+  height: 190px;
+  border: 1.5px solid rgba(240, 165, 0, 0.22);
+  animation: spinCCW 18s linear infinite;
+}
+
+.qr-ring--inner {
+  width: 158px;
+  height: 158px;
+  border: 2px solid rgba(217, 92, 26, 0.12);
+  animation: spinCW 22s linear infinite;
+}
+
+@keyframes spinCW  { to { transform: rotate(360deg); } }
+@keyframes spinCCW { to { transform: rotate(-360deg); } }
+
+/* ── Logo 圖片 ───────────────────────────────────── */
+.qr-logo {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 4px solid #ffffff;
+  object-fit: cover;
+  box-shadow:
+    0 16px 50px rgba(217, 92, 26, 0.22),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 3;
+  animation: logoPulse 3s ease-in-out infinite;
+}
+
+@keyframes logoPulse {
+  0%, 100% { box-shadow: 0 16px 50px rgba(217, 92, 26, 0.22), 0 4px 12px rgba(0,0,0,0.08); }
+  50%       { box-shadow: 0 20px 60px rgba(217, 92, 26, 0.34), 0 6px 18px rgba(0,0,0,0.10); }
+}
+
+/* ── 品牌文字 ─────────────────────────────────────── */
+.qr-brand-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 2;
+}
+
+.qr-brand-zh {
+  font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  font-size: clamp(24px, 6vw, 34px);
+  font-weight: 900;
+  color: #3D2010;
+  letter-spacing: 6px;
+}
+
+.qr-brand-en {
+  font-family: 'Fraunces', serif;
+  font-size: 13px;
+  font-weight: 700;
+  font-style: italic;
+  color: #D95C1A;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* ── 桌號標籤 ─────────────────────────────────────── */
+.qr-table-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: #A84210;
+  background: rgba(217, 92, 26, 0.08);
+  border: 1.5px solid rgba(217, 92, 26, 0.22);
+  border-radius: 10px;
+  padding: 6px 16px;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+/* ── 載入提示文字 ─────────────────────────────────── */
+.qr-hint {
+  font-size: 14px;
+  color: #6A4830;
+  letter-spacing: 0.5px;
+  margin: 0;
+  z-index: 2;
+}
+
+/* 跳動省略號：用 CSS content 動畫模擬 */
+.qr-dots::after {
+  content: '';
+  display: inline-block;
+  animation: dotCycle 1.6s steps(4, end) infinite;
+}
+
+@keyframes dotCycle {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+}
+
+/* ── 版權小字 ─────────────────────────────────────── */
+.qr-copy {
+  position: absolute;
+  bottom: 20px;
+  font-size: 11px;
+  color: #C8A888;
+  letter-spacing: 0.3px;
+  z-index: 2;
+}
+
+/* ── 身份選擇區 ───────────────────────────────────── */
+.qr-select-title {
+  font-size: 15px;
+  color: #6A4830;
+  letter-spacing: 0.5px;
+  margin: 0;
+  z-index: 2;
+}
+
+.qr-entry-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  max-width: 300px;
+  z-index: 2;
+}
+
+.qr-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 18px 20px;
+  border-radius: 18px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  font-family: 'Noto Sans TC', sans-serif;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+
+  &:active {
+    transform: scale(0.97);
+  }
+}
+
+.qr-btn-icon {
+  font-size: 28px;
+  line-height: 1;
+}
+
+.qr-btn-label {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+.qr-btn-sub {
+  font-size: 12px;
+  font-weight: 400;
+  opacity: 0.75;
+  letter-spacing: 0.3px;
+}
+
+.qr-btn--member {
+  background: linear-gradient(135deg, #D95C1A 0%, #F0A500 100%);
+  color: #ffffff;
+  box-shadow: 0 8px 24px rgba(217, 92, 26, 0.30);
+  border-color: rgba(255, 255, 255, 0.20);
+
+  &:hover {
+    box-shadow: 0 12px 32px rgba(217, 92, 26, 0.40);
+    transform: translateY(-2px);
+  }
+}
+
+.qr-btn--guest {
+  background: #ffffff;
+  color: #3D2010;
+  box-shadow: 0 4px 16px rgba(61, 32, 16, 0.10);
+  border-color: rgba(217, 92, 26, 0.22);
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(61, 32, 16, 0.14);
+    transform: translateY(-2px);
+    border-color: rgba(217, 92, 26, 0.40);
+  }
+}
+
+/* ── 減少動畫（a11y）─────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .qr-ring, .qr-logo { animation: none; }
+  .qr-dots::after    { animation: none; content: '...'; }
+  .qr-btn            { transition: none; }
+}
+
+
+/* ══════════════════════════════════════════════════════
+   RWD — 確保圈環與 Logo 在各種尺寸螢幕上不被截斷
+   ══════════════════════════════════════════════════════ */
+
+/* 視窗高度 ≤ 864px（筆電縮放後）：縮小圈環避免超出 */
+@media (max-height: 864px) {
+  .qr-shell {
+    gap: 14px;
+    padding: 28px 24px;
+  }
+  .qr-rings {
+    width: 150px;
+    height: 150px;
+  }
+  .qr-ring--outer {
+    width: 182px;
+    height: 182px;
+  }
+  .qr-ring--mid {
+    width: 158px;
+    height: 158px;
+  }
+  .qr-ring--inner {
+    width: 132px;
+    height: 132px;
+  }
+  .qr-logo {
+    width: 100px;
+    height: 100px;
+  }
+}
+
+/* 視窗更矮時（手機橫向）進一步壓縮 */
+@media (max-height: 640px) {
+  .qr-shell {
+    gap: 10px;
+    padding: 18px 24px;
+  }
+  .qr-rings {
+    width: 120px;
+    height: 120px;
+  }
+  .qr-ring--outer {
+    width: 148px;
+    height: 148px;
+  }
+  .qr-ring--mid {
+    width: 128px;
+    height: 128px;
+  }
+  .qr-ring--inner {
+    width: 106px;
+    height: 106px;
+  }
+  .qr-logo {
+    width: 82px;
+    height: 82px;
+  }
+  .qr-brand-zh {
+    font-size: clamp(18px, 5vw, 26px);
+    letter-spacing: 4px;
+  }
+  .qr-copy {
+    bottom: 10px;
+    font-size: 10px;
+  }
+}
+
+/* 超窄螢幕（手機 ≤ 360px）橫向保護 */
+@media (max-width: 360px) {
+  .qr-shell {
+    padding: 20px 16px;
+  }
+  .qr-brand-zh {
+    letter-spacing: 4px;
+  }
+}

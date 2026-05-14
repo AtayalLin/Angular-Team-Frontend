@@ -1,0 +1,115 @@
+<!--
+  =====================================================
+  檔案名稱：customer-guest.component.html
+  用途說明：訪客快速點餐頁面的 HTML 結構
+  包含區塊：頂部導覽列、左側品牌視覺、右側手機號碼表單
+  流程說明：訪客輸入手機號碼後直接進入點餐，不需要帳號
+  =====================================================
+-->
+
+<!-- ===================================================
+   頂部導覽列
+   =================================================== -->
+<nav class="mode-nav">
+  <a class="nav-staff" [routerLink]="['/staff-login']"
+    >⚙ {{ lang.managementSystem }}</a
+  >
+  <a class="nav-customer" [routerLink]="['/customer-login']"
+    >🍜 {{ lang.customerEntrance }}</a
+  >
+</nav>
+
+<!-- ===================================================
+   主框架
+   =================================================== -->
+<div class="shell">
+  <div class="panel" id="guest-panel">
+    <!-- ===================================================
+       左側品牌視覺欄
+       =================================================== -->
+    <aside class="c-left">
+      <div class="c-blob1"></div>
+      <div class="c-blob2"></div>
+
+      <!-- 浮動食物 emoji 裝飾 -->
+      <div class="c-floats">
+        <span class="c-float">🍜</span>
+        <span class="c-float">🥟</span>
+        <span class="c-float">🍱</span>
+        <span class="c-float">🧆</span>
+        <span class="c-float">🍛</span>
+        <span class="c-float">🥢</span>
+      </div>
+
+      <!-- Logo 圖片區域 -->
+      <div class="c-logo-area">
+        <div class="c-logo-ring">
+          <div class="c-ring-outer"></div>
+          <div class="c-ring-inner"></div>
+          <img class="c-logo-img" src="assets/Logo.png" alt="懶飽飽 Logo" />
+        </div>
+
+        <div class="c-brand-name">
+          <div class="c-brand-zh">懶飽飽</div>
+          <div class="c-brand-en">LazyBaoBao</div>
+        </div>
+
+        <div class="c-tagline">
+          <span class="c-tagline-pill">✦ {{ lang.tagline }} ✦</span>
+        </div>
+      </div>
+    </aside>
+    <!-- 左側品牌視覺欄結束 -->
+
+    <!-- ===================================================
+       右側表單欄：只需要手機號碼一個欄位
+       =================================================== -->
+    <section class="c-right">
+      <!-- 表單頂部標題 -->
+      <div class="c-form-header">
+        <div class="c-welcome">👤 {{ lang.guestOrderBadge }}</div>
+        <h3>{{ lang.guestPageTitle }}</h3>
+        <p>{{ lang.guestPageSubtitle }}</p>
+      </div>
+
+      <!-- 手機號碼輸入欄位（必填） -->
+      <div class="c-field" [class.c-field--error]="phoneError">
+        <label
+          >{{ lang.phoneLbl }} <span class="c-required-mark">*</span></label
+        >
+        <input
+          type="tel"
+          [placeholder]="lang.guestLoginPhonePlaceholder"
+          autocomplete="tel"
+          maxlength="15"
+          [(ngModel)]="phone"
+          (ngModelChange)="clearError()"
+          (keyup.enter)="enterMenu()"
+        />
+        @if (phoneError) {
+          <span class="c-field-error-msg">{{ lang.guestPhoneInputError }}</span>
+        }
+      </div>
+
+      <!-- 進入點餐按鈕 -->
+      <button class="c-guest-submit-btn" (click)="enterMenu()">
+        <span>🛒</span> {{ lang.guestEnterBtn }}
+      </button>
+
+      <!-- 返回登入連結 -->
+      <div class="c-back-login">
+        {{ lang.hasAccount }}
+        <a class="c-back-link" [routerLink]="['/customer-login']">{{
+          lang.backToLogin
+        }}</a>
+      </div>
+    </section>
+    <!-- 右側表單欄結束 -->
+  </div>
+  <!-- Toast 彈出提示 -->
+  @if (toastVisible) {
+    <div class="c-toast">
+      <span>⚠️ {{ toastMessage }}</span>
+    </div>
+  }
+</div>

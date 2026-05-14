@@ -1,0 +1,195 @@
+<!--
+  ⚠ 測試帳號（API 串接前保留）
+  客戶：test@lazybao.com / 0912-345-678  密碼：test1234
+  老闆：admin@lazybao.com  密碼：admin1234
+  分店長：manager@lazybao.com  密碼：mgr1234
+-->
+
+<!-- 頂部導覽列 -->
+<nav class="mode-nav">
+  <a class="nav-staff" (click)="goToStaff()">{{ lang.managementSystem }}</a>
+  <a class="nav-customer">{{ lang.customerEntrance }}</a>
+</nav>
+
+<!-- 國家 / 語系切換列 -->
+<div class="c-country-switch">
+  @for (c of allCountries; track c.code) {
+    <button
+      class="c-country-btn"
+      [class.is-active]="activeCountry === c.code"
+      (click)="selectCountry(c.code)"
+    >
+      <span class="c-flag-dot" [class]="'c-flag-' + c.code.toLowerCase()"></span>
+      {{ c.nameLocal }}
+    </button>
+  }
+</div>
+
+<!-- 主框架 -->
+<div class="shell">
+  <div class="panel" id="customer-panel">
+
+    <!-- 左側品牌視覺欄 -->
+    <aside class="c-left">
+      <div class="c-blob1"></div>
+      <div class="c-blob2"></div>
+      <div class="c-floats">
+        <span class="c-float">🍜</span><span class="c-float">🥟</span>
+        <span class="c-float">🍱</span><span class="c-float">🧆</span>
+        <span class="c-float">🍛</span><span class="c-float">🥢</span>
+      </div>
+      <div class="c-logo-area">
+        <div class="c-logo-ring">
+          <div class="c-ring-outer"></div>
+          <div class="c-ring-inner"></div>
+          <img class="c-logo-img" src="assets/Logo.png" alt="懶飽飽 Logo" />
+        </div>
+        <!-- Logo 文字固定繁體中文 -->
+        <div class="c-brand-name">
+          <div class="c-brand-zh">懶飽飽</div>
+          <div class="c-brand-en">LazyBaoBao</div>
+        </div>
+        <div class="c-tagline">
+          <span class="c-tagline-pill">{{ lang.tagline }}</span>
+        </div>
+      </div>
+
+      <!-- QR Code 現場點餐區塊 -->
+      <div class="c-qr-block">
+        <div class="c-qr-label">{{ lang.qrTitle }}</div>
+        <div class="c-qr-wrap">
+          <qrcode
+            [qrdata]="qrUrl"
+            [width]="140"
+            [errorCorrectionLevel]="'M'"
+            [colorDark]="'#6b3a1f'"
+            [colorLight]="'#fffaf3'"
+          ></qrcode>
+        </div>
+        <div class="c-qr-hint">{{ lang.qrSubtitle }}</div>
+      </div>
+    </aside>
+
+    <!-- 右側表單欄 -->
+    <section class="c-right">
+
+      <!-- 分店選擇器：右上角，依國家篩選（自訂下拉） -->
+      @if (branches.length > 0) {
+        <div class="c-branch-selector">
+          <button type="button" class="c-branch-trigger" (click)="toggleBranchDropdown()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 style="width:13px;height:13px;flex-shrink:0;color:#c25a15">
+              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+              <circle cx="12" cy="9" r="2.5"/>
+            </svg>
+            <span class="c-branch-name">{{ selectedBranchName }}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                 class="c-branch-chevron" [class.open]="branchDropdownOpen"
+                 style="width:12px;height:12px;flex-shrink:0;color:#c25a15">
+              <polyline points="6 9 12 15 18 9"/>
+            </svg>
+          </button>
+          @if (branchDropdownOpen) {
+            <div class="c-branch-dropdown">
+              @for (b of branches; track b.id) {
+                <button type="button" class="c-branch-opt"
+                        [class.active]="b.id === selectedBranchId"
+                        (click)="selectBranch(b.id)">
+                  {{ b.name }}
+                </button>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <div class="c-form-header">
+        <div class="c-welcome">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" width="16" height="16" aria-hidden="true">
+            <path d="M10 2a1 1 0 0 1 1 1v5M7 4a1 1 0 0 1 1-1v4M4.5 6.5A1 1 0 0 1 6 5.6V9M13 4a1 1 0 0 1 1 1v5c0 3-2 5-4 5S6 18 6 15v-3"/>
+          </svg>
+          {{ lang.welcome }}
+        </div>
+        <h3>{{ lang.loginTitle }}</h3>
+        <p>{{ lang.loginSubtitle }}</p>
+      </div>
+
+      <!-- 帳號欄位 -->
+      <div class="c-field">
+        <label>{{ lang.accountLabel }}</label>
+        <input
+          type="text"
+          name="account"
+          [(ngModel)]="account"
+          [placeholder]="lang.accountPlaceholder"
+          autocomplete="username"
+        />
+      </div>
+
+      <!-- 密碼欄位 -->
+      <div class="c-field">
+        <label>{{ lang.passwordLabel }}</label>
+        <div class="c-password-wrap">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            name="password"
+            [(ngModel)]="password"
+            [placeholder]="lang.passwordPlaceholder"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="c-eye-btn"
+            [class.is-visible]="showPassword"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword ? lang.hidePwd : lang.showPwd"
+          >
+            @if (!showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              </svg>
+            }
+            @if (showPassword) {
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              </svg>
+            }
+          </button>
+        </div>
+      </div>
+
+      @if (loginError) {
+        <div class="c-error-msg">{{ loginErrorMsg }}</div>
+      }
+
+      <!-- 登入 / 註冊按鈕群組 -->
+      <div class="c-btn-group">
+        <button class="c-login-btn" (click)="onLogin()">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="17" height="17" aria-hidden="true">
+            <circle cx="8" cy="8" r="5"/><path d="M13 13l5 5M12.5 8H20M17 10.5V8"/>
+          </svg>
+          {{ lang.loginBtn }}
+        </button>
+        <button class="c-register-btn" [routerLink]="['/customer-register']">
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="16" height="16" aria-hidden="true">
+            <path d="M12 5H7a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9"/>
+            <path d="M15 3l2 2-6 6H9v-2l6-6z"/>
+          </svg>
+          {{ lang.registerBtn }}
+        </button>
+      </div>
+
+      <div class="c-divider">{{ lang.divider }}</div>
+
+      <button class="c-guest-btn" [routerLink]="['/customer-guest']">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" width="17" height="17" aria-hidden="true">
+          <circle cx="10" cy="7" r="3.5"/><path d="M3 18c0-3.5 3.1-6 7-6s7 2.5 7 6"/>
+        </svg>
+        {{ lang.guestBtn }}
+      </button>
+
+    </section>
+  </div>
+</div>

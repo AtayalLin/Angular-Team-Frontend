@@ -1,0 +1,989 @@
+/*
+ * =====================================================
+ * 檔案名稱：customer-register.component.scss
+ * 用途說明：客戶註冊頁面的所有樣式
+ * 設計說明：與客戶登入頁面共用相同色彩方案（台灣活力市集）
+ * 色彩說明：
+ *   活力橘紅（主色）      #D95C1A
+ *   深橘（輔助色）        #A84210
+ *   亮金黃（點綴色）      #F0A500
+ *   主要文字色            #3D2010
+ *   次要文字色            #6A4830
+ *   頁面背景色            #FFFAF3
+ *   奶油白背景            #FFFAF3
+ *   邊框線條色            #F0D8B8
+ * =====================================================
+ */
+
+
+/* =====================================================
+   頁面整體容器
+   height: 100dvh  精確等於裝置視窗高度
+   overflow: hidden  禁止捲動
+   padding-top  為頂部固定導覽列保留空間
+   ===================================================== */
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding-top: clamp(108px, 14vh, 124px);
+    padding-right: clamp(12px, 2vw, 24px);
+    padding-bottom: clamp(12px, 2vh, 20px);
+    padding-left: clamp(12px, 2vw, 24px);
+    background-color: #FFFAF3;
+    overflow: hidden;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+
+/* =====================================================
+   頂部導覽列：固定在頁面頂端
+   ===================================================== */
+.mode-nav {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(217, 92, 26, 0.2);
+}
+
+/* 導覽列裡的每一個連結按鈕 */
+.mode-nav a {
+    padding: 10px 28px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* 管理系統按鈕（未選中）— 淺色背景 */
+.mode-nav .nav-staff {
+    background-color: #EDE8DC;
+    color: #9A9080;
+    border-radius: 14px 0 0 14px;
+}
+
+/* 滑鼠移到管理系統按鈕時 */
+.mode-nav .nav-staff:hover {
+    background-color: #E0D8C8;
+    color: #6A6050;
+}
+
+/* 客戶入口按鈕（目前流程）— 橘紅色表示當前分類 */
+.mode-nav .nav-customer {
+    background-color: #D95C1A;
+    color: #ffffff;
+    border-radius: 0 14px 14px 0;
+}
+
+
+/* =====================================================
+   主框架：包住整個左右兩欄的外殼
+   flex: 1  撐滿 :host 扣除 padding 後的剩餘高度
+   ===================================================== */
+.shell {
+    flex: 1;
+    min-height: 0;
+    width: min(1080px, 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+        0 24px 60px rgba(217, 92, 26, 0.16),
+        0 8px 20px rgba(0, 0, 0, 0.07);
+}
+
+/* 面板：佔滿 shell 全部空間，左欄 42%、右欄 58% */
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 42% 58%;
+}
+
+/* 整個面板的背景底色 */
+#register-panel {
+    background-color: #FFFAF3;
+}
+
+
+/* =====================================================
+   左側品牌視覺欄（與客戶登入頁相同設計）
+   暖色漸層背景，放置 Logo 與浮動食物裝飾
+   ===================================================== */
+.c-left {
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-top: clamp(24px, 4vh, 40px);
+    padding-right: clamp(18px, 3vw, 28px);
+    padding-bottom: clamp(24px, 4vh, 40px);
+    padding-left: clamp(18px, 3vw, 28px);
+    background: linear-gradient(160deg, #FFF5E0 0%, #FFE5BC 45%, #FFD09A 100%);
+}
+
+/* 裝飾用發光色塊：右上角（金黃色） */
+.c-blob1 {
+    position: absolute;
+    top: -60px;
+    right: -60px;
+    width: 260px;
+    height: 260px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 165, 0, 0.22) 0%, transparent 70%);
+}
+
+/* 裝飾用發光色塊：左下角（橘紅色） */
+.c-blob2 {
+    position: absolute;
+    bottom: -40px;
+    left: -60px;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(217, 92, 26, 0.16) 0%, transparent 70%);
+}
+
+/* 浮動食物圖示的容器 */
+.c-floats {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    pointer-events: none;
+}
+
+/* 每個浮動的食物 emoji */
+.c-float {
+    position: absolute;
+    font-size: 24px;
+    animation: floatUp 6s ease-in-out infinite;
+    opacity: 0.45;
+}
+
+/* 各個食物 emoji 的位置與動畫延遲 */
+.c-float:nth-child(1) {
+    top: 10%;
+    left: 8%;
+    animation-delay: 0s;
+    font-size: 20px;
+}
+
+.c-float:nth-child(2) {
+    top: 18%;
+    right: 10%;
+    animation-delay: 1.2s;
+    font-size: 26px;
+}
+
+.c-float:nth-child(3) {
+    top: 72%;
+    left: 12%;
+    animation-delay: 2.1s;
+    font-size: 22px;
+}
+
+.c-float:nth-child(4) {
+    top: 80%;
+    right: 8%;
+    animation-delay: 0.7s;
+    font-size: 18px;
+}
+
+.c-float:nth-child(5) {
+    top: 44%;
+    left: 5%;
+    animation-delay: 3s;
+    font-size: 16px;
+}
+
+.c-float:nth-child(6) {
+    top: 55%;
+    right: 5%;
+    animation-delay: 1.8s;
+    font-size: 20px;
+}
+
+/* 浮動動畫：上下飄移並略微旋轉 */
+@keyframes floatUp {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(-5deg);
+    }
+
+    50% {
+        transform: translateY(-14px) rotate(5deg);
+    }
+}
+
+
+/* =====================================================
+   Logo 圖片區域（含旋轉外圈裝飾）
+   ===================================================== */
+.c-logo-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 2;
+}
+
+/* Logo 外層容器，依照視窗高度等比縮放 */
+.c-logo-ring {
+    position: relative;
+    width: clamp(160px, 27vh, 250px);
+    height: clamp(160px, 27vh, 250px);
+}
+
+/* 外圈：橘紅色虛線邊框，緩慢順時針旋轉 */
+.c-ring-outer {
+    position: absolute;
+    top: -12px;
+    right: -12px;
+    bottom: -12px;
+    left: -12px;
+    border: 3px dashed rgba(217, 92, 26, 0.35);
+    border-radius: 50%;
+    animation: spinSlow 30s linear infinite;
+}
+
+/* 內圈：金黃色實線邊框，緩慢逆時針旋轉 */
+.c-ring-inner {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    bottom: -4px;
+    left: -4px;
+    border: 2px solid rgba(240, 165, 0, 0.3);
+    border-radius: 50%;
+    animation: spinSlow 20s linear infinite reverse;
+}
+
+/* 旋轉動畫 */
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Logo 圓形圖片本體 */
+.c-logo-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 4px solid #ffffff;
+    box-shadow: 0 16px 50px rgba(217, 92, 26, 0.28), 0 4px 12px rgba(0, 0, 0, 0.1);
+    object-fit: cover;
+    display: block;
+}
+
+/* 品牌名稱區塊 */
+.c-brand-name {
+    margin-top: clamp(14px, 2.5vh, 22px);
+    text-align: center;
+}
+
+/* 中文品牌名稱 */
+.c-brand-zh {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(28px, 5vh, 44px);
+    font-weight: 900;
+    color: #3D2010;
+    letter-spacing: 5px;
+}
+
+/* 英文品牌名稱 */
+.c-brand-en {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(13px, 1.9vh, 17px);
+    color: #D95C1A;
+    font-weight: 700;
+    letter-spacing: 3px;
+    margin-top: 4px;
+    text-transform: uppercase;
+    font-style: italic;
+}
+
+/* 標語區塊 */
+.c-tagline {
+    margin-top: clamp(12px, 2vh, 20px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* 標語藥丸型標籤 */
+.c-tagline-pill {
+    background-color: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(217, 92, 26, 0.22);
+    border-radius: 30px;
+    padding-top: 7px;
+    padding-right: 22px;
+    padding-bottom: 7px;
+    padding-left: 22px;
+    font-size: clamp(11px, 1.6vh, 14px);
+    color: #A84210;
+    font-weight: 600;
+    letter-spacing: 1px;
+}
+
+
+/* =====================================================
+   右側表單欄
+   justify-content: center  讓表單垂直置中
+   gap  控制各欄位之間的間距
+   ===================================================== */
+.c-right {
+    background-color: #FFFAF3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: clamp(8px, 1.6vh, 16px);
+    padding-top: clamp(12px, 2vh, 24px);
+    padding-right: clamp(24px, 5vw, 60px);
+    padding-bottom: clamp(12px, 2vh, 24px);
+    padding-left: clamp(24px, 5vw, 60px);
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 8px 0 40px rgba(217, 92, 26, 0.05);
+}
+
+/* 右側欄右上角的裝飾性發光圓形（偽元素） */
+.c-right::before {
+    content: '';
+    position: absolute;
+    top: -80px;
+    right: -80px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 165, 0, 0.08) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+/* 表單頂部的標題區塊 */
+.c-form-header {
+    flex-shrink: 0;
+}
+
+/* 頂部的「加入我們」小標籤 */
+.c-welcome {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #FFF5DC, #FFE8B0);
+    border: 1.5px solid rgba(217, 92, 26, 0.22);
+    border-radius: 20px;
+    padding-top: 4px;
+    padding-right: 14px;
+    padding-bottom: 4px;
+    padding-left: 14px;
+    font-size: clamp(10px, 1.4vh, 12px);
+    color: #D95C1A;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+}
+
+/* 主標題 */
+.c-form-header h3 {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(20px, 3.2vh, 32px);
+    font-weight: 900;
+    color: #3D2010;
+    line-height: 1.3;
+    letter-spacing: 1px;
+}
+
+/* 副標題說明文字 */
+.c-form-header p {
+    font-size: clamp(12px, 1.6vh, 14px);
+    color: #6A4830;
+    margin-top: 5px;
+}
+
+/* 必填提示 + 居住地選擇的橫向列 */
+.c-hint-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+/* 必填說明小字（全部欄位均為必填） */
+.c-required-hint {
+    font-size: clamp(10px, 1.3vh, 12px);
+    color: #C8A888;
+    flex-shrink: 0;
+}
+
+/* 居住地下拉選單外層 */
+.c-region-select-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: linear-gradient(135deg, #FFF5DC, #FFE8B0);
+    border: 1.5px solid rgba(217, 92, 26, 0.28);
+    border-radius: 20px;
+    padding: 6px 12px 6px 10px;
+    box-shadow: 0 2px 8px rgba(217, 92, 26, 0.10);
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    cursor: pointer;
+
+    &:hover {
+        border-color: rgba(217, 92, 26, 0.50);
+        box-shadow: 0 4px 14px rgba(217, 92, 26, 0.18);
+        background: linear-gradient(135deg, #FFEECC, #FFD990);
+    }
+
+    &:focus-within {
+        border-color: #D95C1A;
+        box-shadow: 0 0 0 3px rgba(217, 92, 26, 0.14), 0 2px 8px rgba(217, 92, 26, 0.10);
+        background: linear-gradient(135deg, #FFF0CC, #FFDE9A);
+    }
+}
+
+/* 地球 emoji 圖示 */
+.c-region-icon {
+    font-size: 15px;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+/* 原生 select：移除預設外觀 */
+.c-region-select {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(12px, 1.5vh, 14px);
+    font-weight: 700;
+    color: #A84210;
+    cursor: pointer;
+    letter-spacing: 0.3px;
+}
+
+/* 自訂下拉箭頭 */
+.c-region-arrow {
+    font-size: 11px;
+    color: #D95C1A;
+    opacity: 0.75;
+    pointer-events: none;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+/* 必填星號（紅色小字） */
+.c-required-mark {
+    color: #D95C1A;
+    font-weight: 900;
+    margin-left: 2px;
+}
+
+
+/* =====================================================
+   表單輸入欄位
+   ===================================================== */
+.c-field {
+    flex-shrink: 0;
+}
+
+/* 欄位標籤文字 */
+.c-field label {
+    display: block;
+    font-size: clamp(12px, 1.6vh, 15px);
+    font-weight: 700;
+    color: #3D2010;
+    margin-bottom: clamp(3px, 0.6vh, 6px);
+    letter-spacing: 0.5px;
+}
+
+/* 文字輸入框 */
+.c-field input {
+    width: 100%;
+    height: clamp(48px, 7.5vh, 64px);
+    border: 2px solid #F0D8B8;
+    border-radius: 14px;
+    padding-top: 0;
+    padding-right: 18px;
+    padding-bottom: 0;
+    padding-left: 18px;
+    font-size: clamp(14px, 1.9vh, 17px);
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #ffffff;
+    color: #3D2010;
+    outline: none;
+    transition: all 0.25s;
+    box-sizing: border-box;
+}
+
+/* 輸入框獲得焦點時：橘紅色邊框 */
+.c-field input:focus {
+    border-color: #D95C1A;
+    box-shadow: 0 0 0 3px rgba(217, 92, 26, 0.10);
+}
+
+/* 輸入框的提示文字顏色 */
+.c-field input::placeholder {
+    color: #C8A888;
+}
+
+
+/* =====================================================
+   密碼欄位容器（含眼睛切換按鈕）
+   ===================================================== */
+
+/* 相對定位容器，讓眼睛按鈕用絕對定位貼在右側 */
+.c-password-wrap {
+    position: relative;
+    display: block;
+}
+
+/* 密碼輸入框右側留空，避免文字被眼睛按鈕遮住 */
+.c-password-wrap input {
+    padding-right: 50px;
+}
+
+/* 眼睛切換按鈕：絕對定位在輸入框右側垂直置中 */
+.c-eye-btn {
+    position: absolute;
+    right: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 32px;
+    height: 32px;
+    border: none;
+    background-color: transparent;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+    border-radius: 6px;
+    color: #C8A888;
+    transition: color 0.2s, background-color 0.2s;
+}
+
+/* 滑鼠移到眼睛按鈕時 */
+.c-eye-btn:hover {
+    color: #3D2010;
+    background-color: rgba(217, 92, 26, 0.07);
+}
+
+/* 密碼顯示中時，圖示改為橘紅色 */
+.c-eye-btn.is-visible {
+    color: #D95C1A;
+}
+
+/* 眼睛 SVG 圖示大小 */
+.c-eye-btn svg {
+    width: 18px;
+    height: 18px;
+    display: block;
+}
+
+
+/* =====================================================
+   立即註冊按鈕
+   與登入頁的主要按鈕使用相同橘紅漸層設計
+   ===================================================== */
+.c-register-submit-btn {
+    width: 100%;
+    height: clamp(50px, 7.5vh, 62px);
+    background: linear-gradient(145deg, #E06520 0%, #A84210 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 16px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(15px, 2.1vh, 18px);
+    font-weight: 900;
+    letter-spacing: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 8px 22px rgba(217, 92, 26, 0.34),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 光澤掃過效果（偽元素） */
+.c-register-submit-btn::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.16) 50%, transparent 100%);
+    transform: translateX(-100%);
+    transition: transform 0.38s ease;
+}
+
+/* 滑鼠移到按鈕時：光澤從左掃到右 */
+.c-register-submit-btn:hover::after {
+    transform: translateX(100%);
+}
+
+/* 滑鼠移到按鈕時：上移、陰影加深 */
+.c-register-submit-btn:hover {
+    transform: translateY(-3px);
+    box-shadow:
+        0 16px 38px rgba(217, 92, 26, 0.44),
+        0 4px 10px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.20);
+}
+
+/* 按下按鈕時：下沉、陰影縮小 */
+.c-register-submit-btn:active {
+    transform: translateY(1px);
+    transition: all 0.08s;
+    box-shadow:
+        0 3px 10px rgba(217, 92, 26, 0.28),
+        0 1px 3px rgba(0, 0, 0, 0.10);
+}
+
+
+/* =====================================================
+   返回登入連結區塊
+   ===================================================== */
+.c-back-login {
+    text-align: center;
+    font-size: clamp(12px, 1.5vh, 14px);
+    color: #6A4830;
+    flex-shrink: 0;
+}
+
+/* 返回登入的可點擊連結 */
+.c-back-link {
+    color: #D95C1A;
+    font-weight: 700;
+    text-decoration: none;
+    margin-left: 6px;
+    transition: color 0.2s;
+}
+
+/* 滑鼠移到返回連結時：顏色加深 */
+.c-back-link:hover {
+    color: #A84210;
+    text-decoration: underline;
+}
+
+
+/* =====================================================
+   手機號碼欄位：國碼前置 + 號碼輸入框
+   ===================================================== */
+.c-phone-wrap {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: clamp(44px, 6vh, 52px);
+    border: 1.5px solid #F0D8B8;
+    border-radius: 12px;
+    background-color: #FFFDF8;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.c-phone-wrap:focus-within {
+    border-color: var(--c-primary, #D95C1A);
+    box-shadow: 0 0 0 3px rgba(217, 92, 26, 0.12);
+}
+
+.c-phone-wrap.c-input-error {
+    border-color: #E02424;
+    box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.10);
+}
+
+.c-dial-badge {
+    flex-shrink: 0;
+    padding: 0 10px 0 14px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #D95C1A;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.c-phone-sep {
+    flex-shrink: 0;
+    color: #F0D8B8;
+    font-size: 1.1rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.c-phone-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0 14px;
+    font-size: clamp(13px, 1.7vh, 15px);
+    color: #3D2010;
+    height: 100%;
+    font-family: inherit;
+}
+
+.c-phone-input::placeholder {
+    color: #C8A888;
+}
+
+/* 錯誤狀態下輸入框紅色邊框（適用於密碼 wrap） */
+.c-password-wrap.c-input-error input {
+    border-color: #E02424;
+}
+
+/* 錯誤訊息文字 */
+.c-error-msg {
+    font-size: 0.75rem;
+    color: #E02424;
+    margin-top: 4px;
+    padding-left: 4px;
+}
+
+/* 名稱輸入框錯誤狀態 */
+.c-input-error {
+    border-color: #E02424 !important;
+    box-shadow: 0 0 0 3px rgba(224, 36, 36, 0.10) !important;
+}
+
+
+/* =====================================================
+   國家 / 語系切換列
+   固定在 mode-nav 正下方
+   ===================================================== */
+.c-country-switch {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    gap: 6px;
+    background-color: rgba(255, 250, 243, 0.90);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(217, 92, 26, 0.15);
+    border-radius: 12px;
+    padding: 4px;
+}
+
+.c-country-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 14px;
+    border: none;
+    border-radius: 9px;
+    background-color: transparent;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #9A8070;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+}
+
+.c-country-btn .c-flag-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.c-country-btn:hover {
+    background-color: rgba(217, 92, 26, 0.08);
+    color: #3D2010;
+}
+
+.c-country-btn.is-active {
+    background-color: #D95C1A;
+    color: #ffffff;
+}
+
+.c-country-btn.is-active .c-flag-dot {
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+.c-flag-tw { background-color: #CE1126; }
+.c-flag-jp { background-color: #BC002D; }
+.c-flag-kr { background-color: #003478; }
+
+
+/* =====================================================
+   響應式設計：畫面寬度小於 860px 時
+   隱藏左側品牌欄，讓右側表單佔滿全寬
+   ===================================================== */
+@media (max-width: 860px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+
+    .c-left {
+        display: none;
+    }
+
+    .c-right {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 480px) {
+    :host {
+        padding-top: clamp(108px, 16vh, 128px);
+    }
+
+    .c-country-switch {
+        top: 54px;
+        gap: 3px;
+        padding: 3px;
+    }
+
+    .c-country-btn {
+        padding: 5px 10px;
+        font-size: 11.5px;
+        gap: 4px;
+    }
+}
+
+
+/* ── 註冊成功彈出視窗 ─────────────────────────── */
+.c-success-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    animation: fadeIn 0.3s ease;
+}
+
+.c-success-modal {
+    background: #fffaf3;
+    border-radius: 20px;
+    padding: 48px 40px 36px;
+    text-align: center;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    min-width: 300px;
+    animation: slideUp 0.35s ease;
+}
+
+.c-success-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: bounce 0.6s ease;
+}
+
+.c-success-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #6b3a1f;
+    margin-bottom: 10px;
+}
+
+.c-success-msg {
+    font-size: 14px;
+    color: #999;
+    margin-bottom: 24px;
+}
+
+/* 倒數進度條 */
+.c-success-bar {
+    height: 4px;
+    background: #eee;
+    border-radius: 99px;
+    overflow: hidden;
+}
+
+.c-success-bar-fill {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #e07b39, #f4a261);
+    border-radius: 99px;
+    animation: shrink 3s linear forwards;
+}
+
+/* 動畫定義 */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes bounce {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    40% {
+        transform: translateY(-12px);
+    }
+
+    70% {
+        transform: translateY(-6px);
+    }
+}
+
+@keyframes shrink {
+    from {
+        width: 100%;
+    }
+
+    to {
+        width: 0%;
+    }
+}

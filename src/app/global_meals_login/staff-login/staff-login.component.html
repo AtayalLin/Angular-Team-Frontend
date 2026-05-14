@@ -1,0 +1,212 @@
+<!--
+  =====================================================
+  檔案名稱：staff-login.component.html
+  用途說明：管理系統登入頁面的 HTML 結構
+  包含區塊：頂部導覽列、左側品牌欄、右側登入表單
+  Angular 知識點：
+    - [routerLink]       是 Angular 的頁面導覽指令，點擊後切換到指定路由
+    - [class.active]     是 Angular 的條件綁定，當 activeRole === 'M' 時加上 active class
+    - (click)            是 Angular 的事件綁定，點擊時呼叫 TypeScript 裡的方法
+    - [type]             動態綁定 input 的 type 屬性（在 password 與 text 之間切換）
+    - @if (條件) { }     Angular 17+ 內建控制流語法，不需要額外 import，取代舊版 *ngIf
+    - [attr.aria-label]  動態綁定無障礙標籤，讓螢幕閱讀器知道按鈕用途
+  =====================================================
+-->
+
+<!-- ===================================================
+   頂部導覽列：讓 Demo 時可以切換到客戶登入頁面
+   nav-staff 沒有 [routerLink] 表示這是當前頁面，點了不跳轉
+   =================================================== -->
+<nav class="mode-nav">
+  <a class="nav-staff">⚙ 管理系統</a>
+  <!-- (click)="goToCustomer()" 觸發 TypeScript 的方法，先顯示 Loading 再切換頁面 -->
+  <a class="nav-customer" (click)="goToCustomer()">🍜 客戶入口</a>
+</nav>
+
+<!-- ===================================================
+   主框架：包住整個登入卡片的外殼容器
+   =================================================== -->
+<div class="shell">
+  <!-- 面板：使用 CSS Grid 分成左右兩欄 -->
+  <div class="panel" id="staff-panel">
+    <!-- ===================================================
+       左側品牌欄：深色背景，顯示 Logo、品牌名稱、系統資訊
+       =================================================== -->
+    <aside class="s-left">
+      <!-- 第一區塊：Logo 圖片容器（佔左欄 1/3 高度） -->
+      <div class="s-logo-box">
+        <img src="assets/Logo.png" alt="懶飽飽 Logo" />
+      </div>
+
+      <!-- 第二區塊：品牌名稱文字（佔左欄 1/3 高度） -->
+      <div class="s-brand">
+        <div class="s-brand-zh">登入系統</div>
+        <div class="s-brand-tag">POS Management System</div>
+      </div>
+
+      <!-- 第三區塊：系統資訊 -->
+      <div class="s-sysinfo">
+        <div class="s-sysinfo-row">
+          <span class="s-sysinfo-label">系統版本</span>
+          <span class="s-sysinfo-value">v0.2.7.0</span>
+        </div>
+        <div class="s-sysinfo-row">
+          <span class="s-sysinfo-label">系統環境</span>
+          <span class="s-sysinfo-value">Production</span>
+        </div>
+        <div class="s-sysinfo-row">
+          <span class="s-sysinfo-label">伺服器狀態</span>
+          <span class="s-sysinfo-value s-sysinfo-online">● 正常運作</span>
+        </div>
+        <div class="s-sysinfo-divider"></div>
+        <p class="s-sysinfo-hint">© 2025 懶飽飽 · 僅限內部使用</p>
+      </div>
+    </aside>
+    <!-- 左側品牌欄結束 -->
+
+    <!-- ===================================================
+       右側表單欄：白色背景，放置登入表單
+       =================================================== -->
+    <section class="s-right">
+      <!-- 表單頂部標題 -->
+      <div class="s-form-header">
+        <h3>管理人員登入</h3>
+        <p>請輸入您的管理帳號以開始後台操作</p>
+      </div>
+
+      <!-- 帳號輸入欄位 -->
+      <div class="s-field">
+        <label>
+          <span class="dot"></span>
+          帳號
+        </label>
+        <!-- [(ngModel)] 雙向綁定到 TypeScript 的 email 屬性 -->
+        <input
+          type="email"
+          [(ngModel)]="email"
+          name="email"
+          placeholder="請輸入登入電子郵件"
+          autocomplete="email"
+        />
+      </div>
+
+      <!-- 密碼輸入欄位 -->
+      <div class="s-field">
+        <label>
+          <span class="dot"></span>
+          安全密碼
+        </label>
+        <div class="s-pw-wrap">
+          <input
+            [type]="showPassword ? 'text' : 'password'"
+            [(ngModel)]="password"
+            name="password"
+            placeholder="請輸入登入密碼"
+            autocomplete="current-password"
+          />
+          <button type="button" class="s-eye-btn" (click)="togglePassword()" [attr.aria-label]="showPassword ? '隱藏密碼' : '顯示密碼'">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              @if (!showPassword) {
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+              } @else {
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+              }
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 錯誤訊息（loginError 不為 null 時顯示） -->
+      @if (errorMsg) {
+        <p class="s-error-msg">{{ errorMsg }}</p>
+      }
+
+      <!-- 登入按鈕 — (click) 呼叫 submitLogin() 驗證並導向後台 -->
+      <button class="s-submit" (click)="submitLogin()">
+        進入管理後台 <span class="arrow">→</span>
+      </button>
+
+      <!-- 底部法律聲明文字 -->
+      <p class="s-footer-note">僅限授權人員登入 · 所有操作均受稽核記錄</p>
+    </section>
+    <!-- 右側表單欄結束 -->
+  </div>
+  <!-- 面板結束 -->
+</div>
+<!-- 主框架結束 -->
+
+<!-- ══ 首次登入改密碼提醒 Modal ══════════════════════════ -->
+@if (showFirstLoginModal) {
+  <div class="sl-modal-backdrop">
+    <div class="sl-modal">
+
+      <!-- 頂部色帶 -->
+      <div class="sl-modal-header">
+        <div class="sl-modal-icon">🔐</div>
+        <h3 class="sl-modal-title">首次登入安全提醒</h3>
+      </div>
+
+      <!-- 內容區 -->
+      <div class="sl-modal-body">
+        <p class="sl-modal-desc">
+          您目前使用的是系統預設密碼，存在安全風險。<br />
+          建議立即修改；若選擇稍後，下次登入仍會再次提醒。
+        </p>
+
+        <div class="sl-modal-field">
+          <label>新密碼</label>
+          <div class="s-pw-wrap">
+            <input
+              [type]="showFirstLoginNewPwd ? 'text' : 'password'"
+              [(ngModel)]="firstLoginNewPwd"
+              placeholder="請輸入新密碼"
+            />
+            <button type="button" class="s-eye-btn" (click)="showFirstLoginNewPwd = !showFirstLoginNewPwd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                @if (!showFirstLoginNewPwd) {
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                } @else {
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                }
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="sl-modal-field">
+          <label>確認新密碼</label>
+          <div class="s-pw-wrap">
+            <input
+              [type]="showFirstLoginConfirmPwd ? 'text' : 'password'"
+              [(ngModel)]="firstLoginConfirmPwd"
+              placeholder="請再次輸入新密碼"
+            />
+            <button type="button" class="s-eye-btn" (click)="showFirstLoginConfirmPwd = !showFirstLoginConfirmPwd">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                @if (!showFirstLoginConfirmPwd) {
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                } @else {
+                  <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>
+                }
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        @if (firstLoginError) {
+          <p class="sl-modal-error">⚠ {{ firstLoginError }}</p>
+        }
+
+        <div class="sl-modal-actions">
+          <button class="sl-btn-skip" (click)="skipFirstLogin()" [disabled]="firstLoginLoading">
+            稍後修改
+          </button>
+          <button class="sl-btn-confirm" (click)="submitNewPassword()" [disabled]="firstLoginLoading">
+            {{ firstLoginLoading ? '修改中…' : '✓ 立即修改' }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

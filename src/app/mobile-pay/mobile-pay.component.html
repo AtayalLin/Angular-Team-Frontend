@@ -1,0 +1,49 @@
+@if (!paid()) {
+  <div class="mp-page">
+    <div class="mp-card">
+
+      <!-- 頂部品牌 -->
+      <div class="mp-header">
+        <span class="mp-logo">🍚</span>
+        <div class="mp-brand">
+          <div class="mp-brand-name">{{ storeName() }}</div>
+          <div class="mp-brand-sub">行動支付確認</div>
+        </div>
+      </div>
+
+      <!-- 金額 -->
+      <div class="mp-amount-section">
+        <div class="mp-amount-label">付款金額</div>
+        <div class="mp-amount-value">NT$ {{ amount() }}</div>
+      </div>
+
+      <!-- 訂單明細 -->
+      <div class="mp-items">
+        <div class="mp-items-title">訂單明細</div>
+        @for (item of items(); track $index) {
+          <div class="mp-item-row">
+            <span class="mp-item-name">{{ item.name }} × {{ item.qty }}</span>
+            <span class="mp-item-price">NT$ {{ item.price * item.qty }}</span>
+          </div>
+        }
+        <div class="mp-divider"></div>
+        <div class="mp-item-row mp-total-row">
+          <span>合計</span>
+          <span class="mp-total-price">NT$ {{ amount() }}</span>
+        </div>
+      </div>
+
+      <!-- 按鈕 -->
+      <button class="mp-confirm-btn" (click)="confirm()">✔ 確認付款</button>
+      <button class="mp-cancel-btn" (click)="cancel()">取消</button>
+
+    </div>
+  </div>
+} @else {
+  <div class="mp-success-page">
+    <div class="mp-success-icon">✔</div>
+    <div class="mp-success-title">付款成功！</div>
+    <div class="mp-success-msg">感謝您使用懶飽飽行動支付</div>
+    <div class="mp-success-amount">NT$ {{ amount() }}</div>
+  </div>
+}

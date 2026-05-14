@@ -1,0 +1,990 @@
+/*
+ * =====================================================
+ * 檔案名稱：staff-login.component.scss
+ * 用途說明：管理系統登入頁面的所有樣式
+ * 包含區塊：頁面容器、頂部導覽列、主框架、左側品牌欄、右側表單欄、響應式設計
+ * 色彩說明（方案二：台灣活力市集）：
+ *   深海軍藍（主色）      #1E3A5F
+ *   中藍（輔助色）        #2C5282
+ *   亮金黃（點綴色）      #F0A500
+ *   主要文字色            #1A2840
+ *   次要文字色            #4A5A70
+ *   頁面背景色            #F4F6FA
+ *   卡片白色背景          #FFFFFF
+ *   邊框線條色            #D4DCE8
+ * =====================================================
+ */
+
+
+/* =====================================================
+   頁面整體容器（取代原本 body 的角色）
+   :host 代表這個 Angular Component 元件本身的標籤
+
+   響應式設計說明：
+   - min-height: 100dvh  讓容器至少等於視窗高度，但允許內容更高
+   - overflow-y: auto    內容超出時出現捲軸，防止被切斷（投影機低解析度保護）
+   - padding-top         用 clamp() 為頂部固定導覽列保留足夠空間
+   - box-sizing          讓 padding 不會超出範圍
+   ===================================================== */
+:host {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100dvh;
+    height: 100dvh;
+    box-sizing: border-box;
+    padding-top: clamp(52px, 7.5vh, 72px);
+    padding-right: clamp(12px, 2vw, 24px);
+    padding-bottom: clamp(12px, 2vh, 20px);
+    padding-left: clamp(12px, 2vw, 24px);
+    background-color: #F4F6FA;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+
+
+/* =====================================================
+   頂部導覽列：固定在頁面頂端，用來切換管理系統 / 客戶入口
+   position: fixed  讓它永遠固定在畫面頂端，不隨捲動移動
+   transform        讓它水平置中
+   ===================================================== */
+.mode-nav {
+    position: fixed;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(30, 58, 95, 0.18);
+}
+
+/* 導覽列裡的每一個連結按鈕 */
+.mode-nav a {
+    padding: 10px 28px;
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-decoration: none;
+    display: block;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* 目前所在頁面的按鈕（管理系統）— 深海軍藍背景表示「已選中」 */
+.mode-nav .nav-staff {
+    background-color: #1E3A5F;
+    color: #ffffff;
+    border-radius: 14px 0 0 14px;
+}
+
+/* 另一個頁面的連結按鈕（客戶入口）— 淺色表示「未選中」 */
+.mode-nav .nav-customer {
+    background-color: #D4DCE8;
+    color: #6A7A90;
+    border-radius: 0 14px 14px 0;
+}
+
+/* 滑鼠移到客戶入口按鈕時，顏色略深表示可以點擊 */
+.mode-nav .nav-customer:hover {
+    background-color: #BEC8D8;
+    color: #3A4A60;
+}
+
+
+/* =====================================================
+   主框架：包住整個左右兩欄的外殼
+
+   響應式設計說明：
+   - flex: 1           讓 shell 撐滿 :host 扣除 padding 後的剩餘高度
+   - min-height: 480px 低解析度下確保最小可用高度，防止完全壓扁
+   - overflow: hidden  裁切圓角外的溢出內容
+
+   深度感說明：
+   - box-shadow 使用兩層：外層大範圍擴散陰影製造浮起感，內層短距陰影強化邊緣立體感
+   ===================================================== */
+.shell {
+    flex: 1;
+    min-height: 600px;
+    width: min(1080px, 100%);
+    border-radius: 32px;
+    overflow: hidden;
+    position: relative;
+    box-shadow:
+        0 24px 60px rgba(30, 58, 95, 0.20),
+        0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+/* 面板：在 shell 裡佔滿全部空間，分成左右兩欄
+   grid-template-columns: 42% 58% 表示左欄佔 42%、右欄佔 58% */
+.panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    display: grid;
+    grid-template-columns: 42% 58%;
+}
+
+/* 整個管理員面板的背景底色（白色） */
+#staff-panel {
+    background-color: #ffffff;
+}
+
+
+/* =====================================================
+   左側品牌欄
+   深海軍藍背景，放置 Logo、品牌名稱與系統資訊
+   三個直接子區塊各自 flex: 1，平均佔據 1/3 高度
+   ===================================================== */
+.s-left {
+    background-color: #1E3A5F;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 0 clamp(10px, 1.8vh, 18px) 0;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 左側欄的裝飾性格線背景（用 CSS 偽元素 ::before 製作） */
+.s-left::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+}
+
+/* 左側欄右下角的裝飾性發光圓形（用 CSS 偽元素 ::after 製作）
+   使用金黃色光暈，呼應點綴色 #F0A500 */
+.s-left::after {
+    content: '';
+    position: absolute;
+    bottom: -80px;
+    right: -80px;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240, 165, 0, 0.12) 0%, transparent 70%);
+}
+
+/* 第一區塊：Logo 圖片容器（撐滿扣除品牌文字與資訊列後的剩餘高度）
+   flex: 1 讓它佔據大部分空間，min-height: 0 防止溢出
+   max-height 限制 logo 不會過度擴張佔滿整個左欄 */
+.s-logo-box {
+    flex: 1;
+    min-height: 0;
+    max-height: clamp(220px, 48vh, 380px);
+    width: 100%;
+    overflow: hidden;
+    z-index: 2;
+}
+
+/* Logo 圖片本體：cover 讓圖片填滿整個容器，自動裁去超出部分 */
+.s-logo-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    display: block;
+}
+
+/* 第二區塊：品牌名稱文字（收縮為內容高度，不搶 logo 空間）
+   flex: 0 讓它只佔文字本身需要的高度 */
+.s-brand {
+    flex: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: #ffffff;
+    width: 100%;
+    z-index: 2;
+    padding-top: clamp(10px, 1.8vh, 18px);
+    padding-bottom: clamp(10px, 1.8vh, 18px);
+    box-sizing: border-box;
+}
+
+/* 中文品牌名稱：改用 LXGW WenKai TC 楷書字體
+   楷書筆觸讓「懶飽飽」更有手工溫度，與食物品牌氣質相符 */
+.s-brand-zh {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(22px, 3.5vh, 30px);
+    font-weight: 900;
+    letter-spacing: 5px;
+    margin-top: 6px;
+}
+
+/* 品牌標語小字：保留 DM Mono，強化後台技術感 */
+.s-brand-tag {
+    font-size: clamp(14px, 1.6vh, 15px);
+    color: rgba(255, 255, 255, 0.4);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+}
+
+
+/* 品牌副標語 */
+.s-brand-slogan {
+    font-size: clamp(11px, 1.4vh, 13px);
+    color: rgba(255, 255, 255, 0.45);
+    letter-spacing: 2px;
+    margin-top: 6px;
+}
+
+/* 顧客 QR Code 掃碼區 */
+.s-qr-area {
+    flex: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 16px 20px;
+    z-index: 2;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.s-qr-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.s-qr-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 10px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 2px 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.s-qr-hint {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+/* 角色說明徽章列表 */
+.s-role-badges {
+    flex: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 12px 0 4px;
+}
+
+.s-role-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 7px 12px;
+    transition: background 150ms;
+}
+
+.s-role-badge:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.s-role-icon {
+    font-size: 18px;
+    line-height: 1;
+}
+
+.s-role-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.s-role-desc {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* =====================================================
+   第三區塊：系統資訊列表
+   flex: 0 讓此區塊緊貼 brand 下方，不搶 logo 空間
+   border-top 細線作為與品牌名稱區塊的視覺分界
+   ===================================================== */
+.s-sysinfo {
+    flex: 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    width: 100%;
+    z-index: 2;
+    padding-top: clamp(8px, 1.5vh, 14px);
+    padding-right: clamp(12px, 2vw, 20px);
+    padding-bottom: clamp(8px, 1.5vh, 14px);
+    padding-left: clamp(12px, 2vw, 20px);
+    box-sizing: border-box;
+    border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+/* 每一行系統資訊 */
+.s-sysinfo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-radius: 6px;
+    box-sizing: border-box;
+    background-color: rgba(255, 255, 255, 0.07);
+    margin-bottom: 4px;
+}
+
+/* 左側標籤 */
+.s-sysinfo-label {
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(12px, 1.5vh, 14px);
+    color: #CBD5E1;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+}
+
+/* 右側數值 */
+.s-sysinfo-value {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(12px, 1.5vh, 14px);
+    color: #F1F5FF;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+/* 伺服器狀態：正常運作 — 綠色 */
+.s-sysinfo-online {
+    color: #4ADE80;
+}
+
+/* 分隔線 */
+.s-sysinfo-divider {
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.12);
+    margin: 8px 0 6px;
+}
+
+/* 底部版權提示小字 */
+.s-sysinfo-hint {
+    font-size: clamp(10px, 1.2vh, 11px);
+    color: rgba(203, 213, 225, 0.55);
+    text-align: center;
+    margin: 0;
+    letter-spacing: 0.3px;
+}
+
+
+/* =====================================================
+   右側表單欄
+   白色背景，放置登入表單
+   overflow: hidden 確保表單內容不溢出 shell 邊界
+
+   深度感說明：
+   - inset box-shadow 從左側向右投射淡藍色陰影，模擬左側深色欄對右側的間接光影
+   - 讓左右兩欄之間有層次分隔感，而不只是靠顏色區分
+   ===================================================== */
+.s-right {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding-top: clamp(8px, 1.5vh, 20px);
+    padding-right: clamp(24px, 5vw, 64px);
+    padding-bottom: clamp(8px, 1.5vh, 20px);
+    padding-left: clamp(24px, 5vw, 64px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    box-shadow: inset 8px 0 40px rgba(30, 58, 95, 0.055);
+}
+
+/* 表單頂部的標題區塊 */
+.s-form-header {
+    margin-bottom: clamp(8px, 1.5vh, 16px);
+}
+
+/* 主標題文字：改用 LXGW WenKai TC 楷書，讓標題更有質感 */
+.s-form-header h3 {
+    font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+    font-size: clamp(20px, 3.2vh, 32px);
+    font-weight: 900;
+    color: #1A2840;
+    letter-spacing: 1px;
+}
+
+/* 副標題說明文字 */
+.s-form-header p {
+    font-size: clamp(14px, 1.7vh, 15px);
+    color: #4A5A70;
+    margin-top: 6px;
+}
+
+
+/* =====================================================
+   表單輸入欄位
+   ===================================================== */
+.s-field {
+    margin-bottom: clamp(8px, 1.5vh, 16px);
+}
+
+/* 欄位的標籤文字（含左側金黃色小圓點） */
+.s-field label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: clamp(14px, 1.7vh, 16px);
+    font-weight: 800;
+    color: #1A2840;
+    margin-bottom: clamp(4px, 0.8vh, 8px);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+/* 標籤旁邊的金黃色小圓點裝飾 */
+.s-field label .dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background-color: #F0A500;
+    flex-shrink: 0;
+}
+
+/* 文字輸入框 */
+.s-field input {
+    width: 100%;
+    height: clamp(48px, 7.2vh, 62px);
+    border: 2px solid #D4DCE8;
+    border-radius: 12px;
+    padding-top: 0;
+    padding-right: 16px;
+    padding-bottom: 0;
+    padding-left: 16px;
+    font-size: clamp(14px, 1.9vh, 17px);
+    font-family: 'Noto Sans TC', sans-serif;
+    background-color: #F4F6FA;
+    color: #1A2840;
+    outline: none;
+    transition: all 0.25s;
+    box-sizing: border-box;
+}
+
+/* 輸入框被點選（獲得焦點）時的狀態：邊框變深海軍藍，背景變白 */
+.s-field input:focus {
+    border-color: #1E3A5F;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.08);
+}
+
+/* 輸入框的提示文字顏色（淺灰藍色） */
+.s-field input::placeholder {
+    color: #A0AABB;
+}
+
+.s-pw-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+
+    input { width: 100%; padding-right: 40px; }
+}
+
+.s-eye-btn {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: #6B7F99;
+    display: flex;
+    align-items: center;
+
+    svg { width: 18px; height: 18px; }
+    &:hover { color: #1E3A5F; }
+}
+
+
+/* 密碼欄位：移除眼睛切換，固定 type=password，無需額外樣式 */
+
+
+/* =====================================================
+   登入按鈕
+
+   深度感設計說明：
+   - background 改用漸層（由中藍到深藍），模擬按鈕的光線打在上方
+   - box-shadow 分三層：
+       第一層：深色擴散陰影，製造按鈕浮起感
+       第二層：近距離底部陰影，強化厚度感
+       第三層：inset 頂部白色細線，模擬高光（像是有燈光從上方打下來）
+   ===================================================== */
+.s-submit {
+    width: 100%;
+    height: clamp(50px, 7.5vh, 64px);
+    background: linear-gradient(160deg, #2C5282 0%, #1A3558 100%);
+    color: #ffffff;
+    border: none;
+    border-radius: 13px;
+    margin-top: clamp(4px, 0.8vh, 8px);
+    font-family: 'Noto Sans TC', sans-serif;
+    font-size: clamp(15px, 2.1vh, 18px);
+    font-weight: 900;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow:
+        0 6px 20px rgba(30, 58, 95, 0.30),
+        0 2px 6px rgba(0, 0, 0, 0.12),
+        inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* 滑鼠移到登入按鈕時：漸層亮化、上移、陰影加深 */
+.s-submit:hover {
+    background: linear-gradient(160deg, #3A6298 0%, #2C5282 100%);
+    transform: translateY(-3px);
+    box-shadow:
+        0 14px 32px rgba(30, 58, 95, 0.38),
+        0 4px 10px rgba(0, 0, 0, 0.14),
+        inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+
+/* 按下按鈕時：下沉回去，陰影縮小，模擬真實按壓回饋 */
+.s-submit:active {
+    transform: translateY(1px);
+    transition: all 0.08s;
+    box-shadow:
+        0 2px 8px rgba(30, 58, 95, 0.22),
+        0 1px 3px rgba(0, 0, 0, 0.10),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+/* 按鈕內的箭頭符號 */
+.s-submit .arrow {
+    font-size: 18px;
+    transition: transform 0.2s;
+}
+
+/* 滑鼠移到按鈕時，箭頭往右移動一點 */
+.s-submit:hover .arrow {
+    transform: translateX(4px);
+}
+
+
+/* =====================================================
+   表單底部說明文字
+   ===================================================== */
+.s-footer-note {
+    text-align: center;
+    margin-top: clamp(6px, 1.2vh, 12px);
+    font-size: clamp(14px, 1.6vh, 15px);
+    color: #4A5A70;
+    letter-spacing: 0.5px;
+}
+
+
+/* =====================================================
+   響應式設計：畫面寬度小於 860px 時（手機或小平板）
+   隱藏左側品牌欄，讓右側表單佔滿全寬
+   ===================================================== */
+@media (max-width: 860px) {
+    .panel {
+        grid-template-columns: 1fr;
+    }
+
+    .s-left {
+        display: none;
+    }
+
+    .s-right {
+        grid-column: 1 / -1;
+    }
+}
+
+/* =====================================================
+   登入錯誤訊息
+   顯示帳號密碼錯誤的紅色提示文字，出現在輸入欄位下方
+   ===================================================== */
+.s-error-msg {
+    margin: -4px 0 12px;
+    padding: 10px 14px;
+    background: #FFF0F0;
+    border: 1px solid #FECACA;
+    border-radius: 8px;
+    font-size: 13px;
+    color: #DC2626;
+    text-align: center;
+}
+
+
+/* =====================================================
+   投影機 / 低解析度螢幕適配
+   目標解析度：1280×720、1024×768、筆電 1366×768
+
+   設計原則：
+   - 壓縮垂直間距，讓所有內容在矮視窗中完整顯示
+   - 字體微縮，保留可讀性
+   - Logo 縮短高度佔比，確保表單區域有足夠空間
+   ===================================================== */
+@media (max-height: 720px) {
+    :host {
+        padding-top: 56px;
+        padding-bottom: 8px;
+    }
+
+    .shell {
+        border-radius: 20px;
+    }
+
+    .s-brand {
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    .s-brand-zh {
+        font-size: 20px;
+        letter-spacing: 3px;
+        margin-top: 4px;
+    }
+
+    .s-brand-tag {
+        font-size: 11px;
+        margin-top: 4px;
+    }
+
+    .s-sysinfo {
+        gap: 0;
+        padding-top: 8px;
+        padding-bottom: 8px;
+    }
+
+    .s-sysinfo-row {
+        padding: 5px 8px;
+    }
+
+    .s-sysinfo-label { font-size: 10px; }
+    .s-sysinfo-value { font-size: 10px; }
+
+    .s-right {
+        padding-top: 10px;
+        padding-right: clamp(20px, 4vw, 48px);
+        padding-bottom: 10px;
+        padding-left: clamp(20px, 4vw, 48px);
+        justify-content: center;
+    }
+
+    .s-form-header {
+        margin-bottom: 8px;
+    }
+
+    .s-form-header h3 {
+        font-size: 22px;
+    }
+
+    .s-form-header p {
+        font-size: 13px;
+        margin-top: 3px;
+    }
+
+    .s-field {
+        margin-bottom: 8px;
+    }
+
+    .s-field label {
+        font-size: 13px;
+        margin-bottom: 3px;
+    }
+
+    .s-field input {
+        height: 44px;
+        font-size: 14px;
+    }
+
+    .s-submit {
+        height: 46px;
+        font-size: 15px;
+        margin-top: 4px;
+    }
+
+    .s-footer-note {
+        font-size: 12px;
+        margin-top: 6px;
+    }
+}
+
+/* 超矮視窗（768px 以下高度，例如投影機橫向壓縮或舊款投影機） */
+@media (max-height: 620px) {
+    :host {
+        padding-top: 56px;
+        padding-bottom: 6px;
+        height: auto;
+        min-height: 100dvh;
+    }
+
+    .shell {
+        border-radius: 14px;
+        min-height: 520px;
+    }
+
+    .s-brand-zh {
+        font-size: 18px;
+    }
+
+    .s-stats {
+        gap: 4px;
+    }
+
+    .s-field input {
+        height: 40px;
+    }
+
+    .s-submit {
+        height: 42px;
+    }
+}
+
+/* ── 首次登入 Modal ───────────────────────────────────── */
+.sl-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 25, 50, 0.65);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: sl-fade-in 0.2s ease;
+}
+
+@keyframes sl-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.sl-modal {
+  background: #fff;
+  border-radius: 20px;
+  padding: 0;
+  width: min(440px, calc(100vw - 32px));
+  box-shadow:
+    0 32px 80px rgba(15, 25, 60, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.10);
+  overflow: hidden;
+  animation: sl-slide-up 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes sl-slide-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* ── Modal 頂部色帶 ── */
+.sl-modal-header {
+  background: linear-gradient(135deg, #1E3A5F 0%, #2C5282 100%);
+  padding: 28px 32px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -40px;
+    right: -40px;
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(240,165,0,0.18) 0%, transparent 70%);
+  }
+}
+
+.sl-modal-icon {
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.2));
+}
+
+.sl-modal-title {
+  font-family: 'LXGW WenKai TC', 'Noto Serif TC', serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  letter-spacing: 1px;
+}
+
+/* ── Modal 內容區 ── */
+.sl-modal-body {
+  padding: 24px 28px 28px;
+}
+
+.sl-modal-desc {
+  font-size: 0.855rem;
+  color: #5a6a8a;
+  line-height: 1.7;
+  margin: 0 0 20px;
+  text-align: center;
+  padding: 12px 16px;
+  background: #f4f6fb;
+  border-radius: 10px;
+  border-left: 3px solid #F0A500;
+}
+
+.sl-modal-field {
+  text-align: left;
+  margin-bottom: 14px;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a2840;
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+
+    &::before {
+      content: '';
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #F0A500;
+      flex-shrink: 0;
+    }
+  }
+
+  .s-pw-wrap input {
+    width: 100%;
+    height: 46px;
+    border: 2px solid #D4DCE8;
+    border-radius: 10px;
+    padding: 0 42px 0 14px;
+    font-size: 0.95rem;
+    font-family: 'Noto Sans TC', sans-serif;
+    background: #f8f9fc;
+    color: #1A2840;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s;
+
+    &:focus {
+      border-color: #1E3A5F;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.08);
+    }
+
+    &::placeholder { color: #A0AABB; }
+  }
+}
+
+.sl-modal-error {
+  font-size: 0.82rem;
+  color: #dc2626;
+  margin: -6px 0 12px;
+  padding: 8px 12px;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  text-align: center;
+}
+
+/* ── Modal 底部按鈕列 ── */
+.sl-modal-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.sl-btn-skip {
+  padding: 11px 0;
+  border: 1.5px solid #D4DCE8;
+  border-radius: 10px;
+  background: #fff;
+  color: #6a7a90;
+  font-size: 0.88rem;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+  transition: all 0.15s;
+
+  &:hover:not(:disabled) {
+    background: #f4f6fb;
+    border-color: #b0bcd0;
+    color: #3a4a60;
+  }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}
+
+.sl-btn-confirm {
+  padding: 11px 0;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2C5282 0%, #1E3A5F 100%);
+  color: #fff;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: 'Noto Sans TC', sans-serif;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow:
+    0 4px 14px rgba(30, 58, 95, 0.30),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+
+  &:hover:not(:disabled) {
+    background: linear-gradient(135deg, #3A6298 0%, #2C5282 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(30, 58, 95, 0.36);
+  }
+  &:active:not(:disabled) {
+    transform: translateY(0);
+  }
+  &:disabled { opacity: 0.45; cursor: not-allowed; }
+}

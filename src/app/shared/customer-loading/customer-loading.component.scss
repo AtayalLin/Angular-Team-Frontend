@@ -1,0 +1,728 @@
+/*
+ * =====================================================
+ * 檔案名稱：customer-loading.component.scss
+ * 位置說明：src/app/shared/customer-loading/customer-loading.component.scss
+ * 用途說明：客戶端 Loading 過場動畫樣式（完全對應 loading_v4.html）
+ * 色彩對照（loading_v4.html tokens → 此處以字面值取代，禁用 CSS 變數）：
+ *   --primary    → #D95C1A   主色橘紅
+ *   --primary-dk → #A84210   深橘
+ *   --gold       → #F0A500   亮金黃
+ *   --gold-lt    → #FFD166   淺金黃
+ *   --text-main  → #3D2010   主要文字深棕
+ *   --text-sub   → #6A4830   次要文字中棕
+ *   --bg         → #FFFAF3   頁面底色奶油白
+ *   --card       → #FFFFFF   卡片純白
+ *   --border     → #F0D8B8   邊框暖米
+ * 字體（loading_v4.html 同款 Google Fonts）：
+ *   品牌中文：'LXGW WenKai TC', cursive
+ *   品牌英文：'Fraunces', serif
+ *   內文：    'Noto Sans TC', sans-serif
+ *   數字：    'DM Mono', 'Courier New', monospace
+ * 版面：
+ *   桌機：700px 固定寬度卡片，左欄 290px + 右欄 flex:1
+ *   RWD 未特別設計（對應 loading_v4.html 無 RWD 版本）
+ * =====================================================
+ */
+
+
+/* ═══════════════════════════════════════════════════
+   全螢幕遮罩
+   對應 loading_v4.html body 背景：雙橢圓輻射漸層 + 奶油白底
+   position:fixed 遮蓋所有頁面內容
+   ═══════════════════════════════════════════════════ */
+.cl-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: 'Noto Sans TC', sans-serif;
+  /* 雙橢圓輻射漸層：左方橘暈 + 右下金暈 + 奶油白底 */
+  background:
+    radial-gradient(ellipse 65% 55% at 18% 50%, rgba(217, 92, 26, 0.09) 0%, transparent 65%),
+    radial-gradient(ellipse 45% 45% at 82% 75%, rgba(240, 165, 0, 0.07) 0%, transparent 65%),
+    #FFFAF3;
+}
+
+
+/* ═══════════════════════════════════════════════════
+   食物粒子
+   對應 loading_v4.html .food
+   position:fixed 讓粒子相對於視口定位（和原始相同）
+   bottom:-40px 讓粒子從畫面下方開始出現
+   z-index:0 讓粒子在卡片（z-index:10）後方
+   ═══════════════════════════════════════════════════ */
+.food {
+  position: fixed;
+  bottom: -40px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0;
+  /* floatUp：線性持續，inline style 設定各自的 duration / delay */
+  animation: floatUp linear infinite;
+}
+
+/*
+ * floatUp：粒子從下往上飄升整個視口高度（108vh）
+ * 同時輕微旋轉（-6deg → 14deg），模擬飄浮感
+ * 7% 淡入，90% 開始淡出
+ */
+@keyframes floatUp {
+  0%   { transform: translateY(0)      rotate(-6deg); opacity: 0;   }
+  7%   {                                              opacity: 0.3; }
+  90%  {                                              opacity: 0.1; }
+  100% { transform: translateY(-108vh) rotate(14deg); opacity: 0;   }
+}
+
+
+/* ═══════════════════════════════════════════════════
+   分割卡片主體
+   對應 loading_v4.html .card
+   固定寬度 700px，深色橘暖陰影 + 暖米邊框
+   z-index:10 確保卡片在食物粒子（z-index:0）之上
+   ═══════════════════════════════════════════════════ */
+.card {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: row;
+  border-radius: 28px;
+  overflow: hidden;
+  width: 700px;
+  /* 內部頂部白色高光 + 外部兩層橘暖陰影 */
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.85) inset,
+    0 14px 52px rgba(217, 92, 26, 0.15),
+    0 2px 8px rgba(217, 92, 26, 0.07);
+  /* 暖米邊框 */
+  border: 1.5px solid #F0D8B8;
+}
+
+
+/* ═══════════════════════════════════════════════════
+   左側面板
+   對應 loading_v4.html .panel-left
+   固定寬度 290px，四段橘金漸層（158deg）
+   position:relative + overflow:hidden 讓 ::before/::after 效果套用
+   ═══════════════════════════════════════════════════ */
+.panel-left {
+  width: 290px;
+  flex-shrink: 0;
+  background: linear-gradient(
+    158deg,
+    #F5B830  0%,
+    #E07830 32%,
+    #D95C1A 64%,
+    #A84210 100%
+  );
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px 32px;
+  position: relative;
+  overflow: hidden;
+  gap: 0;
+}
+
+/* 內部光影材質：頂部白色橢圓光 + 底部黑色暗影
+   對應 loading_v4.html .panel-left::before */
+.panel-left::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 130% 70% at 50% -10%, rgba(255, 255, 255, 0.16) 0%, transparent 55%),
+    radial-gradient(ellipse 80%  60% at 50% 110%, rgba(0, 0, 0, 0.12)       0%, transparent 55%);
+}
+
+/* 微細白色點陣網格材質，透明度 6%
+   對應 loading_v4.html .panel-left::after */
+.panel-left::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: radial-gradient(circle, #ffffff 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+
+/* ── 旋轉虛線軌道環 ─────────────────────────────
+   對應 loading_v4.html .orbit
+   border: 1.5px dashed（虛線，不是實線）
+   ────────────────────────────────────────────── */
+.orbit {
+  position: absolute;
+  border-radius: 50%;
+  /* 1.5px 白色虛線邊框，微透明 */
+  border: 1.5px dashed rgba(255, 255, 255, 0.22);
+}
+
+/* 外圈（較大）：順時針旋轉，24 秒一圈 */
+.orbit-1 {
+  width: 280px;
+  height: 280px;
+  animation: spinR 24s linear infinite;
+}
+
+/* 內圈（較小）：逆時針旋轉，18 秒一圈 */
+.orbit-2 {
+  width: 230px;
+  height: 230px;
+  animation: spinL 18s linear infinite;
+}
+
+/* spinR：順時針一圈 */
+@keyframes spinR {
+  to { transform: rotate(360deg);  }
+}
+
+/* spinL：逆時針一圈 */
+@keyframes spinL {
+  to { transform: rotate(-360deg); }
+}
+
+
+/* ── 大圓形 Logo 圖片 ───────────────────────────
+   對應 loading_v4.html .logo-img
+   width:230px（大圖填滿左欄），height:auto
+   使用 drop-shadow 濾鏡（無白色圓框）
+   logoFloat：上下飄浮 11px + 陰影同步變化
+────────────────────────────────────────────── */
+.logo-img {
+  position: relative;
+  z-index: 2;
+  width: 230px;
+  height: auto;
+  object-fit: contain;
+  /* 雙層 drop-shadow：深棕暖色，讓 Logo 在橘底浮現 */
+  filter:
+    drop-shadow(0 8px 28px rgba(60, 20, 0, 0.45))
+    drop-shadow(0 2px 6px  rgba(60, 20, 0, 0.25));
+  animation: logoFloat 3.4s ease-in-out infinite;
+}
+
+/*
+ * logoFloat：Logo 上下飄浮 11px，同時 drop-shadow 跟著變化
+ * 50% 時陰影向下增大（Logo 飄高，陰影在下方拉長）
+ */
+@keyframes logoFloat {
+  0%,
+  100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 8px 28px rgba(60, 20, 0, 0.45));
+  }
+  50% {
+    transform: translateY(-11px);
+    filter: drop-shadow(0 16px 32px rgba(60, 20, 0, 0.32));
+  }
+}
+
+
+/* ── 品牌文字區塊 ────────────────────────────────
+   對應 loading_v4.html .left-text
+   flex column，gap:6px，靠上 margin-top:14px
+────────────────────────────────────────────── */
+.left-text {
+  position: relative;
+  z-index: 2;
+  margin-top: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+
+/* ── 中文品牌名稱：懶 飽 飽 ──────────────────────
+   對應 loading_v4.html .left-brand
+   亮金黃 #F0A500，三層 text-shadow（白色高光 + 棕暗 + 金暈）
+────────────────────────────────────────────── */
+.left-brand {
+  font-family: 'LXGW WenKai TC', cursive;
+  font-size: 26px;
+  font-weight: 400;
+  letter-spacing: 5px;
+  color: #F0A500;
+  text-shadow:
+    0 1px 0  rgba(255, 255, 255, 0.15),
+    0 2px 10px rgba(100, 40, 0, 0.5),
+    0 0 24px rgba(240, 165, 0, 0.35);
+}
+
+
+/* ── 英文副標：Global Meals ──────────────────────
+   對應 loading_v4.html .left-en
+   Fraunces italic，白色半透明 rgba(255,255,255,0.85)
+────────────────────────────────────────────── */
+.left-en {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 4px rgba(80, 30, 0, 0.4);
+}
+
+
+/* ── 標語徽章：✦ 懶懶吃，飽飽樂 ✦ ──────────────
+   對應 loading_v4.html .left-badge
+   金色半透明底 + 金色邊框，badgeGlow 讓邊框亮度脈動
+────────────────────────────────────────────── */
+.left-badge {
+  margin-top: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  /* 亮金黃半透明底 rgba(240,165,0,0.18) */
+  background: rgba(240, 165, 0, 0.18);
+  /* 金色邊框，badgeGlow 讓其亮度交替 */
+  border: 1.5px solid rgba(240, 165, 0, 0.65);
+  border-radius: 999px;
+  padding: 6px 18px;
+  font-size: 12px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 700;
+  /* 淺金黃 #FFD166 */
+  color: #FFD166;
+  letter-spacing: 1px;
+  text-shadow: 0 1px 4px rgba(80, 30, 0, 0.3);
+  /* 外部金暈 + 內部頂部高光 */
+  box-shadow:
+    0 0 12px rgba(240, 165, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  animation: badgeGlow 2.6s ease-in-out infinite;
+}
+
+/*
+ * badgeGlow：徽章邊框顏色深淺交替，模擬微微發光效果
+ * 0%/100%：邊框較暗，外暈較弱
+ * 50%：邊框全亮，外暈增強
+ */
+@keyframes badgeGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 12px rgba(240, 165, 0, 0.2);
+    border-color: rgba(240, 165, 0, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 22px rgba(240, 165, 0, 0.5);
+    border-color: rgba(240, 165, 0, 0.9);
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════
+   右側面板
+   對應 loading_v4.html .panel-right
+   flex:1，純白背景，column 排列，padding:32px
+   ═══════════════════════════════════════════════════ */
+.panel-right {
+  flex: 1;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 32px 30px;
+  gap: 0;
+}
+
+
+/* ── Lottie 動畫包裝 ─────────────────────────────
+   對應 loading_v4.html .lottie-wrap
+   full width，column flex，gap:11px（含標籤行）
+────────────────────────────────────────────── */
+.lottie-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 11px;
+}
+
+
+/* ── Lottie 渲染容器 ─────────────────────────────
+   對應 loading_v4.html #lottie-box
+   248×140px，圓角 18px，奶油漸層背景，暖米邊框
+   lottie-web 會在此 div 內渲染 SVG
+────────────────────────────────────────────── */
+.lottie-box {
+  width: 248px;
+  height: 140px;
+  border-radius: 18px;
+  /* 奶油漸層背景，讓 Lottie 動畫區域有溫暖底色 */
+  background: linear-gradient(135deg, #FFF8EE, #FFF2DC);
+  /* 暖米色邊框 */
+  border: 1.5px solid #F0D8B8;
+  overflow: hidden;
+  /* 輕柔橘色陰影 */
+  box-shadow: 0 4px 16px rgba(217, 92, 26, 0.08);
+}
+
+
+/* ── Lottie 下方標籤：Scan to Order ──────────────
+   對應 loading_v4.html .lottie-label
+   兩側各有一條漸層橫線（::before / ::after）
+────────────────────────────────────────────── */
+.lottie-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #6A4830;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+/* 左側漸層橫線：從 #F0D8B8 漸層到 #D95C1A */
+.lottie-label::before {
+  content: '';
+  flex: 1;
+  max-width: 28px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #F0D8B8, #D95C1A);
+}
+
+/* 右側漸層橫線（方向相同，視覺對稱） */
+.lottie-label::after {
+  content: '';
+  flex: 1;
+  max-width: 28px;
+  height: 1.5px;
+  border-radius: 1px;
+  background: linear-gradient(90deg, #F0D8B8, #D95C1A);
+}
+
+
+/* ── 水平分隔線 ──────────────────────────────────
+   對應 loading_v4.html .h-div
+   height:1px，左右兩端漸層淡出，margin:22px 0
+────────────────────────────────────────────── */
+.h-div {
+  width: 100%;
+  height: 1px;
+  margin: 22px 0;
+  /* 透明 → 暖米 → 透明，分隔線兩端柔和消失 */
+  background: linear-gradient(
+    90deg,
+    transparent,
+    #F0D8B8 25%,
+    #F0D8B8 75%,
+    transparent
+  );
+}
+
+
+/* ── 進度條區塊 ──────────────────────────────────
+   對應 loading_v4.html 內聯 style="width:100%"
+   width:100% 讓 pct-row 和 track 都佔滿右側面板
+────────────────────────────────────────────── */
+.progress-section {
+  width: 100%;
+}
+
+
+/* ── 百分比列（LOADING + 數字）──────────────────
+   對應 loading_v4.html .pct-row
+   flex 左右分佈：左側標籤 / 右側跳動數字
+────────────────────────────────────────────── */
+.pct-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 11px;
+  width: 100%;
+}
+
+
+/* ── LOADING 標籤 ────────────────────────────────
+   對應 loading_v4.html .pct-label
+   11px 粗體，2.5px 字距，次要文字棕色，80% 透明
+────────────────────────────────────────────── */
+.pct-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 2.5px;
+  color: #6A4830;
+  opacity: 0.8;
+}
+
+
+/* ── 百分比數字 ──────────────────────────────────
+   對應 loading_v4.html .pct-num
+   等寬字體 DM Mono，22px，主色橘紅，文字發光
+────────────────────────────────────────────── */
+.pct-num {
+  font-family: 'DM Mono', 'Courier New', monospace;
+  font-size: 22px;
+  font-weight: 800;
+  color: #D95C1A;
+  text-shadow: 0 0 12px rgba(217, 92, 26, 0.2);
+}
+
+
+/* ── 進度條軌道 ──────────────────────────────────
+   對應 loading_v4.html .track
+   height:8px，圓角，淺橘半透明底 + 細邊框
+   position:relative 讓 .shimmer 可絕對定位
+────────────────────────────────────────────── */
+.track {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(217, 92, 26, 0.08);
+  border: 1px solid rgba(217, 92, 26, 0.1);
+  overflow: hidden;
+  position: relative;
+}
+
+
+/* ── 進度條填充 ──────────────────────────────────
+   對應 loading_v4.html .fill
+   金黃 → 橘紅 → 深橘漸層，fillAnim 按多段時間點填充
+   box-shadow 讓填充條有發光感
+────────────────────────────────────────────── */
+.fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #F0A500, #D95C1A, #A84210);
+  /* 1.8s（與 TS 計時器同步） */
+  animation: fillAnim 1.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  box-shadow: 0 0 12px rgba(217, 92, 26, 0.4);
+}
+
+/*
+ * fillAnim：分段填充，模擬真實載入的非線性速度
+ * 0%→25%：快速填到 38%
+ * 25%→55%：填到 68%（中段減速）
+ * 55%→80%：填到 88%（快速但尚未結束）
+ * 80%→100%：填到 100%（最後衝刺）
+ */
+@keyframes fillAnim {
+  0%   { width: 0%;   }   /* t=0ms     */
+  22%  { width: 35%;  }   /* t=396ms   */
+  50%  { width: 65%;  }   /* t=900ms   */
+  78%  { width: 88%;  }   /* t=1404ms  */
+  100% { width: 100%; }   /* t=1800ms  */
+}
+
+
+/* ── 進度條閃光 ──────────────────────────────────
+   對應 loading_v4.html .shimmer
+   position:absolute，從 left:-80% 滑動到 left:120%
+   白色中央高光帶，1.9s 循環
+────────────────────────────────────────────── */
+.shimmer {
+  position: absolute;
+  top: 0;
+  left: -80%;
+  width: 80%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.65),
+    transparent
+  );
+  animation: shimAnim 1.9s ease-in-out infinite;
+}
+
+/*
+ * shimAnim：閃光帶從 left:-80% 直線滑動到 left:120%
+ * 使用 left 屬性動畫（配合 position:absolute）
+ */
+@keyframes shimAnim {
+  to { left: 120%; }
+}
+
+
+/* ── 狀態列 ─────────────────────────────────────
+   對應 loading_v4.html .status-row
+   flex row，置中，gap:10px，margin-top:18px
+────────────────────────────────────────────── */
+.status-row {
+  margin-top: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+
+/* ── 彩色狀態點 ──────────────────────────────────
+   對應 loading_v4.html .dot
+   8×8px 圓形，dotPop 動畫讓點放大脈動並發光
+   nth-child 設定各自顏色與延遲
+────────────────────────────────────────────── */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: dotPop 1.5s ease-in-out infinite;
+}
+
+/* 第一個點：主色橘紅 #D95C1A，無延遲 */
+.dot:nth-child(1) {
+  background: #D95C1A;
+  animation-delay: 0s;
+}
+
+/* 第二個點：亮金黃 #F0A500，延遲 0.22s */
+.dot:nth-child(2) {
+  background: #F0A500;
+  animation-delay: 0.22s;
+}
+
+/* 第三個點：深橘 #A84210，延遲 0.44s */
+.dot:nth-child(3) {
+  background: #A84210;
+  animation-delay: 0.44s;
+}
+
+/*
+ * dotPop：點在 40% 放大到 1.75 倍並全亮 + 發光
+ * 0%/80%/100%：原始大小，透明度 0.4（暗淡）
+ * 40%：放大 1.75×，完全不透明，box-shadow 使用 currentColor
+ */
+@keyframes dotPop {
+  0%,
+  80%,
+  100% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1.75);
+    opacity: 1;
+    box-shadow: 0 0 9px currentColor;
+  }
+}
+
+
+/* ── 等待文字：請稍候 · PLEASE WAIT ──────────────
+   對應 loading_v4.html .wait-text
+   12px，2.5px 字距，次要文字棕色，blink 動畫透明度交替
+────────────────────────────────────────────── */
+.wait-text {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 2.5px;
+  color: #6A4830;
+  opacity: 0.75;
+  animation: blink 2s ease-in-out infinite;
+}
+
+/*
+ * blink：文字透明度在 0.45 ↔ 1.0 之間交替
+ * 不完全消失，保持輕柔呼吸感
+ */
+@keyframes blink {
+  0%,
+  100% { opacity: 0.45; }
+  50%  { opacity: 1;    }
+}
+
+
+/* ═══════════════════════════════════════════════════
+   RWD：手機版（≤ 600px）
+   版面：上下堆疊 — 頂部橘色橫條（logo + 品牌文字）
+                   底部白色區塊（Lottie 動畫 + 進度條）
+   ═══════════════════════════════════════════════════ */
+@media (max-width: 600px) {
+
+  /* 卡片改為垂直排列，寬度貼齊螢幕（左右各留 14px） */
+  .card {
+    flex-direction: column;
+    width: calc(100vw - 28px);
+    max-width: 440px;
+    border-radius: 22px;
+  }
+
+  /* ── 頂部橘色區塊 ──────────────────────────────
+     直向排列（logo 置中在上，文字在下）
+     高度拉大與下方動畫區塊形成比例平衡
+  ────────────────────────────────────────────── */
+  .panel-left {
+    width: 100%;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 28px 24px 24px;
+    gap: 0;
+  }
+
+  /* 軌道環縮小讓版面不過度擁擠 */
+  .orbit-1 {
+    width: 200px;
+    height: 200px;
+  }
+
+  .orbit-2 {
+    width: 160px;
+    height: 160px;
+  }
+
+  /* Logo 放大，成為視覺重心 */
+  .logo-img {
+    width: 130px;
+  }
+
+  /* 品牌文字維持置中 */
+  .left-text {
+    margin-top: 12px;
+    text-align: center;
+    align-items: center;
+  }
+
+  .left-brand {
+    font-size: 22px;
+    letter-spacing: 5px;
+  }
+
+  .left-en {
+    font-size: 12px;
+    letter-spacing: 3px;
+  }
+
+  .left-badge {
+    margin-top: 8px;
+    padding: 5px 14px;
+    font-size: 11px;
+  }
+
+  /* ── 底部白色區塊 ──────────────────────────────
+     縮小內距，讓內容在小螢幕上不被擠壓
+  ────────────────────────────────────────────── */
+  .panel-right {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 20px 22px 22px;
+  }
+
+  /* Lottie 框：手機上寬度自適應，高度等比縮小 */
+  .lottie-box {
+    width: min(220px, 100%);
+    height: 124px;
+  }
+
+  /* 分隔線間距縮小 */
+  .h-div {
+    margin: 14px 0;
+  }
+
+  /* 百分比數字稍微縮小 */
+  .pct-num {
+    font-size: 18px;
+  }
+}

@@ -1,0 +1,218 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.mp-page {
+  min-height: 100vh;
+  background: #f5f0eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.mp-card {
+  background: #fff;
+  border-radius: 20px;
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 380px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+}
+
+/* 頂部品牌 */
+.mp-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.mp-logo { font-size: 32px; }
+.mp-brand-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #2d1a0e;
+}
+.mp-brand-sub {
+  font-size: 12px;
+  color: #888;
+  margin-top: 2px;
+}
+
+/* 金額 */
+.mp-amount-section {
+  text-align: center;
+  margin-bottom: 28px;
+}
+.mp-amount-label {
+  font-size: 13px;
+  color: #888;
+  margin-bottom: 6px;
+}
+.mp-amount-value {
+  font-size: 36px;
+  font-weight: 800;
+  color: #2d1a0e;
+  letter-spacing: 1px;
+}
+
+/* 訂單明細 */
+.mp-items {
+  background: #faf8f5;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+.mp-items-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #888;
+  margin-bottom: 12px;
+}
+.mp-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #2d1a0e;
+  margin-bottom: 8px;
+}
+.mp-item-price { color: #555; }
+.mp-divider {
+  height: 1px;
+  background: #e8e0d6;
+  margin: 10px 0;
+}
+.mp-total-row { font-weight: 700; }
+.mp-total-price { color: #c0562a; font-weight: 700; }
+
+/* 按鈕 */
+.mp-confirm-btn {
+  width: 100%;
+  padding: 16px;
+  background: #c0562a;
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-bottom: 12px;
+  transition: background 0.2s;
+  &:active { background: #a04420; }
+}
+.mp-cancel-btn {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: #888;
+  border: 1.5px solid #ddd;
+  border-radius: 12px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: background 0.2s;
+  &:active { background: #f5f0eb; }
+}
+
+/* 付款成功 */
+.mp-success-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #faf8f5;
+  gap: 12px;
+}
+.mp-success-icon {
+  width: 72px;
+  height: 72px;
+  background: #c0562a;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+.mp-success-title {
+  font-size: 24px;
+  font-weight: 800;
+  color: #2d1a0e;
+}
+.mp-success-msg {
+  font-size: 14px;
+  color: #888;
+}
+.mp-success-amount {
+  font-size: 28px;
+  font-weight: 700;
+  color: #c0562a;
+  margin-top: 4px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   RWD — 確保在任何視窗尺寸下卡片不超出畫面
+   ══════════════════════════════════════════════════════ */
+
+/* 卡片寬度安全防護：max-width 不超過視窗可用寬度 */
+.mp-card {
+  max-width: min(380px, calc(100vw - 40px));
+}
+
+/* 視窗高度 ≤ 864px（如 1536×864 縮放後的筆電）：縮減垂直間距 */
+@media (max-height: 864px) {
+  .mp-card {
+    padding: 22px 20px;
+  }
+  .mp-header {
+    margin-bottom: 18px;
+  }
+  .mp-amount-section {
+    margin-bottom: 20px;
+  }
+  .mp-amount-value {
+    font-size: 30px;
+  }
+  .mp-items {
+    padding: 12px;
+    margin-bottom: 18px;
+  }
+  .mp-confirm-btn {
+    padding: 13px;
+  }
+  .mp-cancel-btn {
+    padding: 11px;
+  }
+}
+
+/* 視窗高度更緊時（如手機橫向）進一步壓縮 */
+@media (max-height: 680px) {
+  .mp-card {
+    padding: 16px 18px;
+  }
+  .mp-amount-value {
+    font-size: 26px;
+  }
+  .mp-header {
+    margin-bottom: 12px;
+  }
+  .mp-amount-section {
+    margin-bottom: 14px;
+  }
+  .mp-items {
+    margin-bottom: 12px;
+  }
+}
+
+/* 超窄螢幕保護 */
+@media (max-width: 400px) {
+  .mp-card {
+    border-radius: 14px;
+    padding: 20px 16px;
+  }
+  .mp-brand-name {
+    font-size: 14px;
+  }
+}

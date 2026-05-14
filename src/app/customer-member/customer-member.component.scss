@@ -1,0 +1,654 @@
+/*
+ * ── 設計代字（共用基礎）──────────────────────────────
+ * @use 'design-tokens' 引入共用 SCSS 變數（transition / shadow / spacing 等）
+ * 客戶端色彩為品牌專屬（暖橘奶油），以本地 SCSS 值維護
+ * ─────────────────────────────────────────────────── */
+@use 'design-tokens' as *;
+
+/*
+ * =====================================================
+ * 檔案名稱：customer-member.component.scss
+ * 位置說明：src/app/customer-member/customer-member.component.scss
+ * 用途說明：客戶會員中心頁面的所有樣式
+ * 版面說明：
+ *   桌機 / 筆電（>= 768px）：
+ *     整頁鎖定 100dvh，左欄（基本資料）固定 340px，
+ *     右欄（訂單紀錄）獨立捲動容器
+ *   手機（< 768px）：
+ *     整頁鎖定 100dvh，上區（基本資料）固定高度，
+ *     下區（訂單紀錄）獨立捲動容器
+ *
+ * Flex 鏈說明（桌機）：
+ *   :host[height:100dvh, flex col]
+ *     → .cm-shell[flex:1, flex col]
+ *       → .cm-container[flex:1, flex col]
+ *         → .cm-profile-header[flex-shrink:0]
+ *         → .cm-panels[flex:1, flex row, overflow:hidden]
+ *           → .cm-panel-left[width:340px, overflow-y:auto]
+ *           → .cm-panel-right[flex:1, overflow-y:auto] ← 獨立捲動
+ *
+ * 關鍵技巧：
+ *   min-height: 0 → flex 子項預設 min-height: auto，會阻止它向內縮小，
+ *                   加上 min-height: 0 才能讓 flex 鏈正確傳遞高度
+ *
+ * 色彩說明（沿用客戶端方案）：
+ *   活力橘紅（主色）      #D95C1A
+ *   深橘（輔助色）        #A84210
+ *   亮金黃（點綴色）      #F0A500
+ *   主要文字色            #3D2010
+ *   次要文字色            #6A4830
+ *   頁面背景色            #FFFAF3（奶油白）
+ *   卡片白色背景          #FFFFFF
+ *   邊框線條色            #F0D8B8
+ * =====================================================
+ */
+
+
+/* ── 頁面整體容器 ─────────────────────────────────────
+   :host 代表 Angular 元件本身的標籤（<app-customer-member>）
+   height: 100dvh 鎖定整頁高度，不讓頁面整體捲動
+   flex col → 垂直排列 cm-shell
+───────────────────────────────────────────────────── */
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  background-color: #FFFAF3;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+
+/* ── 頂部模式切換導覽列 ───────────────────────────────
+   position: fixed 固定在頁面頂部，不佔 flex 空間
+───────────────────────────────────────────────────── */
+.mode-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background-color: rgba(255, 250, 243, 0.95);
+  border-bottom: 1px solid #F0D8B8;
+  z-index: 100;
+  padding: 0 20px;
+}
+
+.mode-nav a {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color $transition-base, color $transition-base;
+}
+
+.mode-nav .nav-staff {
+  color: #6A4830;
+  background-color: transparent;
+}
+
+.mode-nav .nav-staff:hover {
+  background-color: rgba(240, 165, 0, 0.12);
+  color: #3D2010;
+}
+
+.mode-nav .nav-customer {
+  background-color: #D95C1A;
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+
+/* ── 主框架 ───────────────────────────────────────────
+   flex: 1 → 撐滿 :host 的剩餘高度
+   min-height: 0 → 允許此 flex 子項向內縮小，高度傳遞必要
+───────────────────────────────────────────────────── */
+.cm-shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+
+/* ── 主內容容器 ───────────────────────────────────────
+   flex: 1 + min-height: 0 → 繼續傳遞高度給子項
+   padding-top: 68px → 為固定導覽列（48px）留空間
+   max-width: 1100px → 限制內容寬度，水平置中
+───────────────────────────────────────────────────── */
+.cm-container {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 68px 24px 16px;
+  box-sizing: border-box;
+}
+
+
+/* ── 使用者資訊橫幅 ──────────────────────────────────
+   flex-shrink: 0 → 高度固定，不隨 flex 壓縮
+───────────────────────────────────────────────────── */
+.cm-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #F0D8B8;
+  flex-shrink: 0;
+}
+
+/* 文字頭像圓圈 */
+.cm-avatar {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #D95C1A 0%, #F0A500 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #FFFFFF;
+  font-family: 'LXGW WenKai TC', cursive;
+  flex-shrink: 0;
+  box-shadow: 0 3px 12px rgba(217, 92, 26, 0.35);
+}
+
+/* 名稱與標籤群組 */
+.cm-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.cm-user-name {
+  font-size: 17px;
+  font-weight: 700;
+  color: #3D2010;
+  font-family: 'LXGW WenKai TC', cursive;
+}
+
+.cm-user-tag {
+  font-size: 12px;
+  color: #6A4830;
+  font-family: 'Noto Sans TC', sans-serif;
+  margin-top: 2px;
+}
+
+/* 儲存成功提示 toast */
+.cm-save-toast {
+  font-size: 13px;
+  color: #2E7D32;
+  background-color: rgba(46, 125, 50, 0.10);
+  border: 1px solid rgba(46, 125, 50, 0.25);
+  border-radius: 20px;
+  padding: 5px 14px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* 登出按鈕 */
+.cm-logout-btn {
+  padding: 7px 16px;
+  border: 1px solid #F0D8B8;
+  border-radius: 20px;
+  background-color: transparent;
+  color: #6A4830;
+  font-size: 13px;
+  font-family: 'Noto Sans TC', sans-serif;
+  cursor: pointer;
+  transition: background-color $transition-base, border-color $transition-base, color $transition-base;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cm-logout-btn:hover {
+  background-color: rgba(217, 92, 26, 0.08);
+  border-color: #D95C1A;
+  color: #D95C1A;
+}
+
+
+/* ── 雙欄內容容器（桌機：左右並排）────────────────────
+   flex: 1 + min-height: 0 → 高度傳遞，撐滿剩餘空間
+   overflow: hidden → 讓子欄各自捲動，而非整頁捲動
+   flex-direction: row → 左右並排（桌機預設）
+───────────────────────────────────────────────────── */
+.cm-panels {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  padding-top: 20px;
+  gap: 0;
+}
+
+
+/* ── 左欄：個人資料（桌機）──────────────────────────
+   width: 340px + flex-shrink: 0 → 固定寬度，不壓縮
+   overflow-y: auto → 編輯模式展開時此欄可獨立捲動
+───────────────────────────────────────────────────── */
+.cm-panel-left {
+  width: 340px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  padding-right: 28px;
+  border-right: 1px solid #F0D8B8;
+}
+
+
+/* ── 右欄：訂單紀錄（桌機）──────────────────────────
+   flex: 1 → 佔滿左欄以外的全部寬度
+   min-width: 0 → 防止內容撐破容器
+   overflow-y: auto → 訂單列表獨立捲動
+───────────────────────────────────────────────────── */
+.cm-panel-right {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding-left: 28px;
+}
+
+
+/* ── 區塊標題 ─────────────────────────────────────────
+   兩個區塊各自的標題列，底部橘紅色底線
+───────────────────────────────────────────────────── */
+.cm-panel-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #3D2010;
+  font-family: 'Noto Sans TC', sans-serif;
+  padding-bottom: 14px;
+  border-bottom: 2px solid #D95C1A;
+  margin-bottom: 16px;
+}
+
+
+/* ════════════════════════════════════════════════════
+   個人資料區樣式
+═══════════════════════════════════════════════════ */
+
+/* ── 檢視模式：資料列 ─────────────────────────────── */
+.cm-view-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.cm-field-row {
+  display: flex;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(240, 216, 184, 0.5);
+}
+
+.cm-field-label {
+  width: 80px;
+  font-size: 13px;
+  color: #6A4830;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+  flex-shrink: 0;
+}
+
+.cm-field-value {
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: #3D2010;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+/* 密碼遮罩字元 - 加大字體增加視覺效果 */
+.cm-password-dots {
+  font-size: 18px;
+  letter-spacing: 3px;
+  color: #A84210;
+}
+
+/* 修改資料按鈕 */
+.cm-edit-btn {
+  margin-top: 24px;
+  padding: 10px 28px;
+  background-color: #D95C1A;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color $transition-base, box-shadow $transition-base, transform $transition-fast;
+  align-self: flex-start;
+}
+
+.cm-edit-btn:hover {
+  background-color: #A84210;
+  box-shadow: 0 4px 12px rgba(217, 92, 26, 0.35);
+  transform: translateY(-2px);
+}
+
+.cm-edit-btn:active {
+  transform: translateY(0px);
+}
+
+
+/* ── 編輯模式：輸入框 ─────────────────────────────── */
+.cm-edit-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cm-input-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cm-input-field label {
+  font-size: 13px;
+  color: #6A4830;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+}
+
+/* 可選提示文字（「不修改請留空」） */
+.cm-optional {
+  font-size: 11px;
+  color: #A89080;
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+.cm-input-field input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #F0D8B8;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  font-size: 14px;
+  color: #3D2010;
+  font-family: 'Noto Sans TC', sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition: border-color $transition-base;
+}
+
+.cm-input-field input:focus {
+  border-color: #D95C1A;
+}
+
+/* 密碼輸入框包裝（相對定位，讓眼睛按鈕貼在右側） */
+.cm-password-wrap {
+  position: relative;
+}
+
+.cm-password-wrap input {
+  padding-right: 44px;
+}
+
+/* 眼睛切換按鈕 */
+.cm-eye-btn {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 4px;
+  color: #A89080;
+  transition: color $transition-base;
+}
+
+.cm-eye-btn:hover {
+  color: #D95C1A;
+}
+
+.cm-eye-btn svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+/* 操作按鈕列 */
+.cm-edit-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+/* 儲存按鈕 */
+.cm-save-btn {
+  padding: 10px 28px;
+  background-color: #D95C1A;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color $transition-base, box-shadow $transition-base, transform $transition-fast;
+}
+
+.cm-save-btn:hover {
+  background-color: #A84210;
+  box-shadow: 0 4px 12px rgba(217, 92, 26, 0.35);
+  transform: translateY(-2px);
+}
+
+/* 取消按鈕 */
+.cm-cancel-btn {
+  padding: 10px 22px;
+  background-color: transparent;
+  color: #6A4830;
+  border: 1.5px solid #F0D8B8;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color $transition-base, border-color $transition-base;
+}
+
+.cm-cancel-btn:hover {
+  background-color: rgba(240, 216, 184, 0.3);
+  border-color: #A84210;
+}
+
+
+/* ════════════════════════════════════════════════════
+   訂單紀錄區樣式
+═══════════════════════════════════════════════════ */
+
+/* 無訂單提示 */
+.cm-empty-orders {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: #A89080;
+  font-size: 15px;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.cm-empty-icon {
+  font-size: 40px;
+}
+
+/* 訂單卡片 */
+.cm-order-card {
+  background-color: #FFFFFF;
+  border: 1px solid #F0D8B8;
+  border-radius: 12px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  transition: box-shadow $transition-base;
+  margin-bottom: 12px;
+}
+
+.cm-order-card:hover {
+  box-shadow: 0 4px 16px rgba(217, 92, 26, 0.10);
+}
+
+/* 卡片頂部：訂單編號 + 狀態標籤 */
+.cm-order-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cm-order-id {
+  font-size: 13px;
+  font-weight: 600;
+  color: #6A4830;
+  font-family: 'DM Mono', monospace;
+  letter-spacing: 0.5px;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 訂單狀態標籤（基底樣式） */
+.cm-order-status {
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Noto Sans TC', sans-serif;
+  padding: 3px 12px;
+  border-radius: 20px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* 已完成：綠色 */
+.cm-order-status.status-done {
+  background-color: rgba(46, 125, 50, 0.10);
+  color: #2E7D32;
+  border: 1px solid rgba(46, 125, 50, 0.25);
+}
+
+/* 備餐中：橘色 */
+.cm-order-status.status-cooking {
+  background-color: rgba(217, 92, 26, 0.10);
+  color: #D95C1A;
+  border: 1px solid rgba(217, 92, 26, 0.30);
+}
+
+/* 已取消：灰色 */
+.cm-order-status.status-cancelled {
+  background-color: rgba(120, 100, 80, 0.10);
+  color: #786450;
+  border: 1px solid rgba(120, 100, 80, 0.25);
+}
+
+/* 訂單日期 */
+.cm-order-date {
+  font-size: 13px;
+  color: #A89080;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+/* 訂單品項 */
+.cm-order-items {
+  font-size: 14px;
+  color: #3D2010;
+  font-family: 'Noto Sans TC', sans-serif;
+  line-height: 1.5;
+}
+
+/* 訂單金額列 */
+.cm-order-total {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(240, 216, 184, 0.5);
+}
+
+.cm-total-label {
+  font-size: 12px;
+  color: #A89080;
+  font-family: 'Noto Sans TC', sans-serif;
+}
+
+.cm-total-amount {
+  font-size: 16px;
+  font-weight: 700;
+  color: #D95C1A;
+  font-family: 'DM Mono', monospace;
+}
+
+
+/* ── 手機響應式（< 768px）────────────────────────────
+   改為上下堆疊版面：基本資料在上（固定），訂單在下（捲動）
+   Flex 鏈（手機）：
+     :host[height:100dvh] → .cm-shell[flex:1] → .cm-container[flex:1, flex col]
+       → .cm-profile-header[flex-shrink:0]
+       → .cm-panels[flex:1, flex col]
+         → .cm-panel-left[flex-shrink:0]   ← 基本資料，自然高度
+         → .cm-panel-right[flex:1, overflow-y:auto] ← 訂單，獨立捲動
+───────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+
+  .cm-container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  /* 手機：改為垂直堆疊 */
+  .cm-panels {
+    flex-direction: column;
+    padding-top: 12px;
+  }
+
+  /* 手機：上區（基本資料）佔滿全寬，底部分隔線，不壓縮 */
+  .cm-panel-left {
+    width: auto;           /* 取消桌機的 340px 固定寬度 */
+    flex-shrink: 0;
+    overflow-y: visible;   /* 取消獨立捲動，讓內容自然撐高 */
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid #F0D8B8;
+    padding-bottom: 14px;
+  }
+
+  /* 手機：下區（訂單紀錄）撐滿剩餘高度，獨立捲動 */
+  .cm-panel-right {
+    flex: 1;
+    min-height: 0;         /* 允許此項目向內縮小，overflow-y:auto 才有效 */
+    overflow-y: auto;
+    padding-left: 0;
+    padding-top: 14px;
+  }
+
+  /* 手機：操作按鈕列改為垂直排列 */
+  .cm-edit-actions {
+    flex-direction: column;
+  }
+
+}

@@ -1,0 +1,58 @@
+<div class="qr-shell">
+
+  <!-- 背景裝飾色塊 -->
+  <div class="qr-blob qr-blob--top"></div>
+  <div class="qr-blob qr-blob--bottom"></div>
+
+  <!-- 旋轉外圈組 -->
+  <div class="qr-rings">
+    <div class="qr-ring qr-ring--outer"></div>
+    <div class="qr-ring qr-ring--mid"></div>
+    <div class="qr-ring qr-ring--inner"></div>
+    <!-- Logo -->
+    <img class="qr-logo" src="/assets/logo圓形.png" alt="懶飽飽 Logo" width="120" height="120" />
+  </div>
+
+  <!-- 品牌文字 -->
+  <div class="qr-brand-area">
+    <div class="qr-brand-zh">懶 飽 飽</div>
+    <div class="qr-brand-en">LazyBaoBao</div>
+  </div>
+
+  <!-- 桌號標籤（有值才顯示） -->
+  @if (tableId) {
+    <div class="qr-table-badge">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13">
+        <rect x="2" y="3" width="12" height="10" rx="2"/>
+        <path d="M5 3V2M11 3V2M2 7h12"/>
+      </svg>
+      桌位 {{ tableId }}
+    </div>
+  }
+
+  <!-- 載入提示（loading 階段才顯示） -->
+  @if (status === 'loading') {
+    <p class="qr-hint">正在載入您的桌位<span class="qr-dots" aria-hidden="true"></span></p>
+  }
+
+  <!-- 身份選擇（select 階段） -->
+  @if (status === 'select') {
+    <p class="qr-select-title">請選擇您的入場方式</p>
+    <div class="qr-entry-btns">
+      <button class="qr-btn qr-btn--member" (click)="goMember()">
+        <span class="qr-btn-icon">👤</span>
+        <span class="qr-btn-label">會員登入</span>
+        <span class="qr-btn-sub">使用帳號點餐，享會員優惠</span>
+      </button>
+      <button class="qr-btn qr-btn--guest" (click)="goGuest()">
+        <span class="qr-btn-icon">🍜</span>
+        <span class="qr-btn-label">訪客快速點餐</span>
+        <span class="qr-btn-sub">免登入，直接開始點餐</span>
+      </button>
+    </div>
+  }
+
+  <!-- 版權 -->
+  <span class="qr-copy">© 懶飽飽 Global Meals</span>
+
+</div>
